@@ -14,6 +14,7 @@ import java.util.Arrays;
 
 /**
  * @since 1.0.0
+ * @author sootysplash, revised by majorsopa
  */
 public class MixinMethod {
     protected final boolean returnFromHook;
@@ -50,7 +51,7 @@ public class MixinMethod {
         try {
             this.returnType = this.injectTo.getDeclaredMethod(this.methodName, clazzes).getReturnType();
         } catch (NoSuchMethodException e) {
-            throw new PoetryHookException(e);
+            throw new PoetryHookException(e);// revised by majorsopa
         }
 
         this.returnFromHook = this.annotation.returnFromHook;
@@ -60,7 +61,7 @@ public class MixinMethod {
                 String methodName = this.matcher.method_name();
                 this.match_method = this.matcher.method_class().getDeclaredMethod(methodName, this.matcher.method_parameters());
             } catch (NoSuchMethodException e) {
-                throw new PoetryHookException(e);
+                throw new PoetryHookException(e);// revised by majorsopa
             }
         }
         this.opcode = this.matcher.match_opcode();

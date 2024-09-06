@@ -11,6 +11,7 @@ import static org.objectweb.asm.Opcodes.ASM9;
 
 /**
  * @since 1.0.0
+ * @author majorsopa, revised by sootysplash
  */
 public class MixinClassVisitor extends ClassVisitor {
     private final String methodName;
@@ -28,13 +29,14 @@ public class MixinClassVisitor extends ClassVisitor {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-//        boolean wtf = signature == null; //this code causes issues
+//        boolean wtf = signature == null; // revised by sootysplash
         if (name.equals(this.methodName) && (/*wtf || */descriptor.equals(this.methodSignature))) {
+            // sootysplash start
             if (!isPost) {
                 return new MixinMethodVisitor(super.visitMethod(access, name, descriptor, signature, exceptions), this.mixin);
-            } else {
-                return new PostMethodVisitor(super.visitMethod(access, name, descriptor, signature, exceptions));
             }
+            // sootysplash end
+            return new PostMethodVisitor(super.visitMethod(access, name, descriptor, signature, exceptions));
         }
         return super.visitMethod(access, name, descriptor, signature, exceptions);
     }

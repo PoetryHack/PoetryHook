@@ -11,6 +11,7 @@ import java.lang.annotation.Target;
 
 /**
  * @since 1.0.0
+ * @author majorsopa, fully rewritten by sootysplash
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

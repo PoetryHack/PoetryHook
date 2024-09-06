@@ -11,6 +11,7 @@ import java.util.Objects;
 
 /**
  * @since 1.0.0
+ * @author sootysplash
  */
 public class MixinReturnObject {
     private final Object object;

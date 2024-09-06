@@ -9,6 +9,7 @@ import org.objectweb.asm.ClassWriter;
 
 /**
  * @since 1.0.0
+ * @author sootysplash
  */
 public class MixinClassWriter extends ClassWriter {
     public MixinClassWriter(ClassReader classReader, int flags) {
@@ -19,7 +20,7 @@ public class MixinClassWriter extends ClassWriter {
 //        try {
             return super.getCommonSuperClass(type1, type2);
         /*} catch (Exception e) {
-//            System.out.println("Exception when getting super common class:" + type1 + "|" + type2);
+            System.err.println("Exception when getting super common class:" + type1 + "|" + type2);
             try {
                 Class<?> c = Class.forName("org.spongepowered.asm.mixin.transformer.ClassInfo");
                 Method m1 = c.getMethod("getCommonSuperClass", String.class, String.class);
@@ -27,12 +28,11 @@ public class MixinClassWriter extends ClassWriter {
                 Object o = m1.invoke(null, type1, type2);
                 Method m2 = c.getMethod("getName");
                 m2.setAccessible(true);
-                String str = (String) m2.invoke(o);
-                System.out.println("Sponge mixin superclass:" + str);
+                return (String) m2.invoke(o);
             } catch (Exception ex) {
-                e.addSuppressed(e);
+                e.addSuppressed(ex);
             }
-            throw new RuntimeException(e);
+            throw new PoetryHookException(e);
         }*/
     }
 

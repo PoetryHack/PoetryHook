@@ -17,13 +17,13 @@ import java.util.HashMap;
 
 /**
  * @since 1.0.0
+ * @author majorsopa & sootysplash
  */
 public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
-    private final MixinMethod mixin;
+    // sootysplash start
     private static short index = 256;
     public static final HashMap<Class<?>, Class<?>> primToWrapper = new HashMap<>();
     public static final HashMap<Class<?>, Method> wrapperPrimMethod = new HashMap<>();
-
     static {
         primToWrapper.put(boolean.class, Boolean.class);
         primToWrapper.put(int.class, Integer.class);
@@ -47,12 +47,17 @@ public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
             throw new PoetryHookException(e);
         }
     }
+    // sootysplash end
 
+    private final MixinMethod mixin;
     public MixinMethodVisitor(MethodVisitor methodVisitor, MixinMethod methodToCall) {
         super(ASM9, methodVisitor);
         this.mixin = methodToCall;
     }
 
+    /**
+     * @author majorsopa
+     */
     @Override
     public void visitCode() {
         if (mixin.location.equals(InjectLocation.HEAD) && mixin.isInject()) {
@@ -61,6 +66,9 @@ public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
         super.visitCode();
     }
 
+    /**
+     * @author sootysplash
+     */
     @Override
     public void visitMethodInsn(final int opcode, final String owner, final String name, final String descriptor, final boolean isInterface) {
         if (mixin.matcher.match_after() && mixin.isInject()) {
@@ -80,6 +88,9 @@ public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
         }
     }
 
+    /**
+     * @author sootysplash
+     */
     @Override
     public void visitTypeInsn(final int opcode, final String type) {
         if (mixin.matcher.match_after() && mixin.isInject()) {
@@ -97,6 +108,9 @@ public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
         }
     }
 
+    /**
+     * @author sootysplash
+     */
     @Override
     public void visitFieldInsn(final int opcode, final String owner, final String name, final String descriptor) {
         if (mixin.matcher.match_after() && mixin.isInject()) {
@@ -116,6 +130,9 @@ public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
         }
     }
 
+    /**
+     * @author majorsopa
+     */
     @Override
     public void visitInsn(int opcode) {
         if (mixin.location.equals(InjectLocation.TAIL) && this.isAReturn(opcode) && mixin.isInject()) {
@@ -124,11 +141,15 @@ public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
         super.visitInsn(opcode);
     }
 
+    /**
+     * @author majorsopa & sootysplash
+     */
     private void callMethod(MixinMethod mixin) {
 
         Method methodToCall = mixin.methodToCall;
-
         StringBuilder sb = new StringBuilder();
+
+        // sootysplash start
         if (!mixin.isRedirect()) {
             sb.append("(");
             {
@@ -201,7 +222,9 @@ public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
             Label label1 = new Label();
             this.visitLabel(label1);
         }
+        // sootysplash end
 
+        // majorsopa start
         super.visitMethodInsn(
                 INVOKESTATIC,
                 methodToCall.getDeclaringClass().getName().replace('.', '/'),
@@ -211,6 +234,9 @@ public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
         );
 
         if (mixin.returnFromHook) {
+            // majorsopa end
+
+            // sootysplash start
             if (!mixin.methodToCall.getReturnType().equals(MixinReturnObject.class)) {
                 return;
             }
@@ -303,7 +329,9 @@ public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
                 Label label4 = new Label();
                 this.visitLabel(label4);
             }
+            // sootysplash end
 
+            // majorsopa start
             switch (mixin.returnType.getName()) {
                 case "int", "byte", "char", "short", "boolean" -> super.visitInsn(IRETURN);
                 case "long" -> super.visitInsn(LRETURN);
@@ -314,9 +342,13 @@ public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
             }
 
             this.visitLabel(label3);
+            // majorsopa end
         }
     }
 
+    /**
+     * @author majorsopa
+     */
     private boolean isAReturn(int opcode) {
         switch (opcode) {
             case IRETURN, LRETURN, FRETURN, DRETURN, ARETURN, RETURN -> {

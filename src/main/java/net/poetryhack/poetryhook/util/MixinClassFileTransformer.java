@@ -13,6 +13,7 @@ import java.util.Arrays;
 
 /**
  * @since 1.0.0
+ * @author majorsopa, revised by sootysplash
  */
 public class MixinClassFileTransformer implements ClassFileTransformer {
     private final MixinMethod mixin;
@@ -22,11 +23,11 @@ public class MixinClassFileTransformer implements ClassFileTransformer {
 
     public MixinClassFileTransformer(MixinMethod mixin) {
         this.mixin = mixin;
-        this.methodName = this.mixin.methodName;
-        this.className = mixin.injectTo.getName().replace(".", "/");
-        // repeated code
+        this.methodName = this.mixin.methodName; // revised by sootysplash
+        this.className = mixin.injectTo.getName().replace(".", "/"); // revised by sootysplash
         StringBuilder methodSigSb = new StringBuilder("(");
 
+        // sootysplash start
         Class<?>[] annotation = mixin.annotation.toHookArgs;
         boolean isAnnotation = annotation.length != 0 || mixin.annotation.forceUseAnnotationArgs;
         Class<?>[] params = this.mixin.methodToCall.getParameterTypes();
@@ -34,6 +35,7 @@ public class MixinClassFileTransformer implements ClassFileTransformer {
             params = Arrays.copyOfRange(params, 1, params.length);
         }
         Class<?>[] clazzes = isAnnotation ? annotation : params;
+        // sootysplash end
 
         for (Class<?> clazz : clazzes) {
             switch (clazz.getName()) {
@@ -48,7 +50,7 @@ public class MixinClassFileTransformer implements ClassFileTransformer {
                 case "" -> {}
                 default -> {
                     methodSigSb.append("L").append(clazz.getName().replace(".", "/"));
-//                    if (clazz.getTypeParameters().length > 0) methodSigSb.append("<*>");
+//                    if (clazz.getTypeParameters().length > 0) methodSigSb.append("<*>"); //revised by sootysplash
                     methodSigSb.append(";");
                 }
             }
@@ -93,7 +95,6 @@ public class MixinClassFileTransformer implements ClassFileTransformer {
 
                 return data;
             } catch (Exception e) {
-//                e.printStackTrace();
                 throw new PoetryHookException(e);
             }
         }

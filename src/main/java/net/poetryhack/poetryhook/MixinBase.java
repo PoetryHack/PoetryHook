@@ -17,6 +17,8 @@ import java.util.ArrayList;
 /**
  * Interface to implement when creating a new mixin class
  *
+ * @author majorsopa, fully rewritten by sootysplash
+ *
  * @since 1.0.0
  */
 @SuppressWarnings("unused")
@@ -25,12 +27,13 @@ public interface MixinBase extends Opcodes {
     /**
      * @return ArrayList of {@link MixinMethod} contained by this mixin
      * @since 1.0.0
+     * @author sootysplash
      */
     default ArrayList<MixinMethod> mixins() {
         ArrayList<MixinMethod> mixinsToReturn = new ArrayList<>();
 
         if (!this.getClass().isAnnotationPresent(Mixin.class)) {
-            throw new PoetryHookException("Mixin declared without @Mixin annotation!\nClass: " + this.getClass().getName());
+            throw new PoetryHookException("Mixin declared without @Mixin annotation!\nClass: " + this.getClass().getName());// revised by major sopa
         }
 
         for (Method method : this.getClass().getDeclaredMethods()) {

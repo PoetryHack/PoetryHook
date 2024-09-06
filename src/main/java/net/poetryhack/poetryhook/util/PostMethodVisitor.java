@@ -11,16 +11,19 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import static org.objectweb.asm.Opcodes.ASM9;
 
 /**
  * @since 1.0.0
+ * @author sootysplash
  */
 public class PostMethodVisitor extends MethodVisitor {
     private final HashMap<String, Integer> label2int = new HashMap<>();
     private int min = 0;
+    private final StringBuffer sb = new StringBuffer();
     public PostMethodVisitor(MethodVisitor methodVisitor) {
         super(ASM9, methodVisitor);
     }
@@ -31,6 +34,7 @@ public class PostMethodVisitor extends MethodVisitor {
             final Object[] local,
             final int numStack,
             final Object[] stack) {
+        sb.append("FRAME: " + type + " | " + numLocal + " | " + Arrays.toString(local) + " | " + numStack + " | " + Arrays.toString(stack) + "\n");
         super.visitFrame(type, numLocal, local, numStack, stack);
     }
     @Override
@@ -39,6 +43,7 @@ public class PostMethodVisitor extends MethodVisitor {
             final String descriptor,
             final Handle bootstrapMethodHandle,
             final Object... bootstrapMethodArguments) {
+        sb.append("DYNAMIC: " + name + " | " + descriptor + " | " + bootstrapMethodHandle + " | " + Arrays.toString(bootstrapMethodArguments) + "\n");
         super.visitInvokeDynamicInsn(name, descriptor, bootstrapMethodHandle, bootstrapMethodArguments);
     }
     @Override
@@ -48,28 +53,33 @@ public class PostMethodVisitor extends MethodVisitor {
             final String name,
             final String descriptor,
             final boolean isInterface) {
+        sb.append("METHOD: " + getOpcodeName(opcode) + " | " + owner + " | " + name + " " + descriptor + "\n");
         super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
     }
     @Override
     public void visitInsn(final int opcode) {
+        sb.append("INSN: " + getOpcodeName(opcode) + "\n");
         super.visitInsn(opcode);
     }
     @Override
     public void visitVarInsn(final int opcode, final int varIndex) {
+        sb.append("VAR: " + getOpcodeName(opcode) + " index: " + varIndex + "\n");
         super.visitVarInsn(opcode, varIndex);
     }
     @Override
     public void visitTypeInsn(final int opcode, final String type) {
+        sb.append("TYPE: " + getOpcodeName(opcode) + " type: " + type + "\n");
         super.visitTypeInsn(opcode, type);
     }
     @Override
     public void visitFieldInsn(
             final int opcode, final String owner, final String name, final String descriptor){
+        sb.append("FIELD: " + getOpcodeName(opcode) + " " + owner + " " + name + " " + descriptor + "\n");
         super.visitFieldInsn(opcode, owner, name, descriptor);
     }
     @Override
     public void visitJumpInsn(final int opcode, final Label label) {
-
+        sb.append("JUMP: " + getOpcodeName(opcode) + " TO: " + label2int.get(label.toString()) + "\n");
         super.visitJumpInsn(opcode, label);
     }
     @Override
@@ -78,6 +88,7 @@ public class PostMethodVisitor extends MethodVisitor {
         if (!label2int.containsKey(name)) {
             label2int.put(name, min++);
         }
+        sb.append("LABEL: " + label2int.get(name) + "\n");
         super.visitLabel(label);
     }
     @Override
@@ -88,14 +99,17 @@ public class PostMethodVisitor extends MethodVisitor {
             final Label start,
             final Label end,
             final int index) {
+        sb.append("LOCAL: " + name + " | " + descriptor + " | " + signature + " | " + label2int.get(start.toString()) + " | " + label2int.get(end.toString()) + " | " + index + "\n");
         super.visitLocalVariable(name, descriptor, signature, start, end, index);
     }
     @Override
     public void visitMaxs(final int maxStack, final int maxLocals) {
+        sb.append("MAXS: " + maxStack + " | " + maxLocals + "\n");
         super.visitMaxs(maxStack, maxLocals);
     }
     @Override
     public void visitEnd() {
+        System.out.println(sb +"\n");
         super.visitEnd();
     }
     private String getOpcodeName(int opcode) {
@@ -108,8 +122,7 @@ public class PostMethodVisitor extends MethodVisitor {
                     break;
                 }
             } catch (Exception e) {
-//                e.printStackTrace(System.out);
-                throw new PoetryHookException(e);
+                throw new PoetryHookException(e); //revised by majorsopa
             }
         }
         return opName;
