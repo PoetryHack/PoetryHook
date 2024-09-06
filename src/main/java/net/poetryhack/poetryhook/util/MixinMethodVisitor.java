@@ -17,7 +17,8 @@ import java.util.HashMap;
 
 /**
  * @since 1.0.0
- * @author majorsopa & sootysplash
+ * @author majorsopa
+ * @author sootysplash
  */
 public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
     // sootysplash start
@@ -142,7 +143,8 @@ public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
     }
 
     /**
-     * @author majorsopa & sootysplash
+     * @author majorsopa
+     * @author sootysplash
      */
     private void callMethod(MixinMethod mixin) {
 
