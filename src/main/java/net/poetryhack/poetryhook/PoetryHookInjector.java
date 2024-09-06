@@ -8,6 +8,7 @@ import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+@SuppressWarnings("unused")
 public final class PoetryHookInjector {
     public static ArrayList<ClassFileTransformer> injectMixins(Instrumentation inst, ArrayList<MixinMethod> mixinBases) {
         ArrayList<ClassFileTransformer> transformers = new ArrayList<>();
