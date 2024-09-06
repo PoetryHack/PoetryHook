@@ -16,5 +16,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface StringMixin {
+    /**
+     * The binary class name of the class to inject into, e.g. java.lang.String
+     */
     String value();
 }
