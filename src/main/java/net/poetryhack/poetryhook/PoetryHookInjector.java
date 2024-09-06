@@ -11,6 +11,7 @@ import net.poetryhack.poetryhook.util.MixinMethod;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -29,14 +30,19 @@ public final class PoetryHookInjector {
      * @see #ejectMixins(Instrumentation, ArrayList)
      * @since 1.0.0
      */
-    public static ArrayList<ClassFileTransformer> injectMixins(Instrumentation inst, ArrayList<MixinMethod> mixinBases) {
+    public static ArrayList<ClassFileTransformer> injectMixins(Instrumentation inst, Collection<MixinBase> mixinBases) {
         ArrayList<ClassFileTransformer> transformers = new ArrayList<>();
         ArrayList<Class<?>> classesToRetransform = new ArrayList<>();
         HashMap<Class<?>, MixinMethod[]> mixinsForClass = new HashMap<>();
 
+        ArrayList<MixinMethod> mixinMethods = new ArrayList<>();
+        for (MixinBase base : mixinBases) {
+            mixinMethods.addAll(base.mixins());
+        }
+
         ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors.newFixedThreadPool(mixinBases.size());
 
-        for (MixinMethod mixin : mixinBases) {
+        for (MixinMethod mixin : mixinMethods) {
             try {
                 MixinClassFileTransformer transformer = new MixinClassFileTransformer(mixin);
                 transformers.add(transformer);
@@ -68,7 +74,7 @@ public final class PoetryHookInjector {
         tpe.shutdown();
         while (tpe.getActiveCount() > 0) {}
 
-        for (MixinMethod mixin : mixinBases) {
+        for (MixinMethod mixin : mixinMethods) {
             if (!mixin.loaded) {
                 throw new PoetryHookException("Failed to inject Mixin: " + mixin.methodToCall.getDeclaringClass().getName() + " / " + mixin.methodToCall.getName());
             }
@@ -80,7 +86,7 @@ public final class PoetryHookInjector {
     /**
      * @param inst {@link Instrumentation} object that created the transformers
      * @param transformers ArrayList of {@link ClassFileTransformer} objects created by the agent
-     * @see #injectMixins(Instrumentation, ArrayList)
+     * @see #injectMixins(Instrumentation, Collection)
      * @since 1.0.0
      */
     public static void ejectMixins(Instrumentation inst, ArrayList<ClassFileTransformer> transformers) {
