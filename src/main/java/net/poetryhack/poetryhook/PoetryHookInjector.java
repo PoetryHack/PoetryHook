@@ -18,14 +18,15 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Utility class to handle the boilerplate of injection and ejection
- * @author majorsopa & sootysplash
+ * @author majorsopa
+ * @author sootysplash
  * @since 1.0.0
  */
 @SuppressWarnings("unused")
 public final class PoetryHookInjector {
     /**
      * @param inst {@link Instrumentation} object of the agent
-     * @param mixinBases ArrayList of {@link MixinMethod} subclass objects to inject
+     * @param mixinBases {@link MixinMethod} subclass objects to inject
      * @return ArrayList of {@link ClassFileTransformer} objects which can be used for ejection
      * @see #ejectMixins(Instrumentation, ArrayList)
      * @since 1.0.0
@@ -63,7 +64,51 @@ public final class PoetryHookInjector {
             }
         }
 
-        ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors.newFixedThreadPool(mixinBases.length);
+        retransformAllRelevantClasses(inst, classesToRetransform, mixinsForClass, mixinBases.length);
+
+        for (MixinMethod mixin : mixinMethods) {
+            if (!mixin.loaded) {
+                throw new PoetryHookException("Failed to inject Mixin: " + mixin.methodToCall.getDeclaringClass().getName() + " / " + mixin.methodToCall.getName());
+            }
+        }
+        // sootysplash end
+
+        return transformers;
+    }
+
+    /**
+     * @param inst {@link Instrumentation} object that created the transformers
+     * @param transformers ArrayList of {@link ClassFileTransformer} objects created by the agent
+     * @see #injectMixins(Instrumentation, MixinBase...)
+     * @see #retransformAllRelevantClasses(Instrumentation, ArrayList, HashMap, int)
+     * @since 1.0.0
+     * @author majorsopa
+     */
+    public static void ejectMixins(Instrumentation inst, ArrayList<ClassFileTransformer> transformers) {
+        for (ClassFileTransformer transformer : transformers) {
+            try {
+                inst.removeTransformer(transformer);
+            } catch (Throwable e) {
+                throw new PoetryHookException(e);
+            }
+        }
+    }
+
+    /**
+     * @param inst Agent {@link Instrumentation} object
+     * @param classesToRetransform {@link ArrayList} of classes that are to be retransformed
+     * @param mixinsForClass {@link HashMap} of {@link Class} keys to {@link MixinMethod} arrays which are the mixins for the classes being hooked
+     * @param poolLength {@link int} for the size of {@link ThreadPoolExecutor} made for async retransformation
+     * @since 1.0.0
+     * @author sootysplash, seperated into api method by majorsopa
+     */
+    public static void retransformAllRelevantClasses(
+            Instrumentation inst,
+            ArrayList<Class<?>> classesToRetransform,
+            HashMap<Class<?>, MixinMethod[]> mixinsForClass,
+            int poolLength
+    ) {
+        ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors.newFixedThreadPool(poolLength);
 
         for (Class<?> clazz : classesToRetransform) {
             tpe.execute(() -> {
@@ -80,31 +125,5 @@ public final class PoetryHookInjector {
         tpe.shutdown();
         //noinspection StatementWithEmptyBody
         while (tpe.getActiveCount() > 0) {}
-
-        for (MixinMethod mixin : mixinMethods) {
-            if (!mixin.loaded) {
-                throw new PoetryHookException("Failed to inject Mixin: " + mixin.methodToCall.getDeclaringClass().getName() + " / " + mixin.methodToCall.getName());
-            }
-        }
-        // sootysplash end
-
-        return transformers;
-    }
-
-    /**
-     * @param inst {@link Instrumentation} object that created the transformers
-     * @param transformers ArrayList of {@link ClassFileTransformer} objects created by the agent
-     * @see #injectMixins(Instrumentation, MixinBase...)
-     * @since 1.0.0
-     * @author majorsopa
-     */
-    public static void ejectMixins(Instrumentation inst, ArrayList<ClassFileTransformer> transformers) {
-        for (ClassFileTransformer transformer : transformers) {
-            try {
-                inst.removeTransformer(transformer);
-            } catch (Throwable e) {
-                throw new PoetryHookException(e);
-            }
-        }
     }
 }
