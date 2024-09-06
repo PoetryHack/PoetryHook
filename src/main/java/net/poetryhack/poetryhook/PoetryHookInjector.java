@@ -19,7 +19,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Utility class to handle the boilerplate of injection and ejection
- *
+ * @author majorsopa & sootysplash
  * @since 1.0.0
  */
 @SuppressWarnings("unused")
