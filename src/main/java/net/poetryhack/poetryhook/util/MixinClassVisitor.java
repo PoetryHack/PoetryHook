@@ -1,3 +1,7 @@
+/**
+ * Created: 03.29.2024
+ */
+
 package net.poetryhack.poetryhook.util;
 
 import org.objectweb.asm.ClassVisitor;
@@ -5,6 +9,9 @@ import org.objectweb.asm.MethodVisitor;
 
 import static org.objectweb.asm.Opcodes.ASM9;
 
+/**
+ * @since 1.0.0
+ */
 public class MixinClassVisitor extends ClassVisitor {
     private final String methodName;
     private final String methodSignature;

@@ -1,5 +1,10 @@
+/**
+ * Created: 07.11.2024
+ */
+
 package net.poetryhack.poetryhook.util;
 
+import net.poetryhack.poetryhook.exceptions.PoetryHookException;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
@@ -10,6 +15,9 @@ import java.util.HashMap;
 
 import static org.objectweb.asm.Opcodes.ASM9;
 
+/**
+ * @since 1.0.0
+ */
 public class PostMethodVisitor extends MethodVisitor {
     private final HashMap<String, Integer> label2int = new HashMap<>();
     private int min = 0;
@@ -101,6 +109,7 @@ public class PostMethodVisitor extends MethodVisitor {
                 }
             } catch (Exception e) {
 //                e.printStackTrace(System.out);
+                throw new PoetryHookException(e);
             }
         }
         return opName;

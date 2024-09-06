@@ -1,11 +1,19 @@
+/**
+ * Created: 03.29.2024
+ */
+
 package net.poetryhack.poetryhook.util;
 
+import net.poetryhack.poetryhook.exceptions.PoetryHookException;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.util.Arrays;
 
+/**
+ * @since 1.0.0
+ */
 public class MixinClassFileTransformer implements ClassFileTransformer {
     private final MixinMethod mixin;
     private final String className;
@@ -84,8 +92,9 @@ public class MixinClassFileTransformer implements ClassFileTransformer {
                 }
 
                 return data;
-            } catch (Exception e) {//else this silently throws an exception
+            } catch (Exception e) {
 //                e.printStackTrace();
+                throw new PoetryHookException(e);
             }
         }
 

@@ -1,3 +1,7 @@
+/**
+ * Created: 06.26.2024
+ */
+
 package net.poetryhack.poetryhook.util;
 
 import net.poetryhack.poetryhook.annotations.ShouldReturn;
@@ -5,6 +9,9 @@ import net.poetryhack.poetryhook.annotations.ToReturn;
 
 import java.util.Objects;
 
+/**
+ * @since 1.0.0
+ */
 public class MixinReturnObject {
     private final Object object;
     private final boolean shouldReturn;

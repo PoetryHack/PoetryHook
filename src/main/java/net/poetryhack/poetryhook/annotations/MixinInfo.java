@@ -1,10 +1,18 @@
+/**
+ * Created: 07.11.2024
+ */
+
 package net.poetryhack.poetryhook.annotations;
 
+import net.poetryhack.poetryhook.exceptions.PoetryHookException;
 import net.poetryhack.poetryhook.util.InjectLocation;
 import net.poetryhack.poetryhook.util.MixinType;
 
 import java.lang.reflect.Method;
 
+/**
+ * @since 1.0.0
+ */
 public class MixinInfo {
     public static MixinInfo fromInject(Inject inject) {
         return new MixinInfo(inject.injectLocation(),
@@ -30,7 +38,7 @@ public class MixinInfo {
         } else if (method.isAnnotationPresent(Redirect.class)) {
             return fromRedirect(method.getAnnotation(Redirect.class)).setPostIfPresent(method);
         } else {
-            throw new IllegalStateException("Method passed without @Inject or @Redirect!\n" +
+            throw new PoetryHookException("Method passed without @Inject or @Redirect!\n" +
                     "Method: " + method.getName() + " Declaring Class: " + method.getDeclaringClass().getName());
         }
     }

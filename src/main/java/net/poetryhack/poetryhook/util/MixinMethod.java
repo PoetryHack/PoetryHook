@@ -1,12 +1,20 @@
+/**
+ * Created: 07.10.2024
+ */
+
 package net.poetryhack.poetryhook.util;
 
 import net.poetryhack.poetryhook.annotations.Matcher;
 import net.poetryhack.poetryhook.annotations.Mixin;
 import net.poetryhack.poetryhook.annotations.MixinInfo;
+import net.poetryhack.poetryhook.exceptions.PoetryHookException;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+/**
+ * @since 1.0.0
+ */
 public class MixinMethod {
     protected final boolean returnFromHook;
     protected final Class<?> returnType;
@@ -42,7 +50,7 @@ public class MixinMethod {
         try {
             this.returnType = this.injectTo.getDeclaredMethod(this.methodName, clazzes).getReturnType();
         } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
+            throw new PoetryHookException(e);
         }
 
         this.returnFromHook = this.annotation.returnFromHook;
@@ -52,7 +60,7 @@ public class MixinMethod {
                 String methodName = this.matcher.method_name();
                 this.match_method = this.matcher.method_class().getDeclaredMethod(methodName, this.matcher.method_parameters());
             } catch (NoSuchMethodException e) {
-                throw new RuntimeException(e);
+                throw new PoetryHookException(e);
             }
         }
         this.opcode = this.matcher.match_opcode();
