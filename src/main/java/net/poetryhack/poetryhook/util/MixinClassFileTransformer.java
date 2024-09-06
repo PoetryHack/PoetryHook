@@ -1,3 +1,7 @@
+/**
+ * Created: 03.29.2024
+ */
+
 package net.poetryhack.poetryhook.util;
 
 import net.poetryhack.poetryhook.exceptions.PoetryHookException;
@@ -7,6 +11,9 @@ import org.objectweb.asm.ClassWriter;
 import java.lang.instrument.ClassFileTransformer;
 import java.util.Arrays;
 
+/**
+ * @since 1.0.0
+ */
 public class MixinClassFileTransformer implements ClassFileTransformer {
     private final MixinMethod mixin;
     private final String className;

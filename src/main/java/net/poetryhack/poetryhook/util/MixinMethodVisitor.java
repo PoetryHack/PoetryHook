@@ -1,3 +1,7 @@
+/**
+ * Created: 03.29.2024
+ */
+
 package net.poetryhack.poetryhook.util;
 
 import net.poetryhack.poetryhook.annotations.ShouldReturn;
@@ -11,6 +15,9 @@ import org.objectweb.asm.Type;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
+/**
+ * @since 1.0.0
+ */
 public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
     private final MixinMethod mixin;
     private static short index = 256;

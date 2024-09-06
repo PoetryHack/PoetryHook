@@ -1,3 +1,7 @@
+/**
+ * Created: 11.05.2024 (MM:DD:YYY)
+ */
+
 package net.poetryhack.poetryhook;
 
 import net.poetryhack.poetryhook.exceptions.PoetryHookException;
@@ -9,8 +13,20 @@ import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * Utility class to handle the boilerplate of injection and ejection
+ *
+ * @since 1.0.0
+ */
 @SuppressWarnings("unused")
 public final class PoetryHookInjector {
+    /**
+     * @param inst {@link Instrumentation} object of the agent
+     * @param mixinBases ArrayList of {@link MixinMethod} subclass objects to inject
+     * @return ArrayList of {@link ClassFileTransformer} objects which can be used for ejection
+     * @see #ejectMixins(Instrumentation, ArrayList)
+     * @since 1.0.0
+     */
     public static ArrayList<ClassFileTransformer> injectMixins(Instrumentation inst, ArrayList<MixinMethod> mixinBases) {
         ArrayList<ClassFileTransformer> transformers = new ArrayList<>();
         ArrayList<Class<?>> classesToRetransform = new ArrayList<>();
@@ -51,6 +67,12 @@ public final class PoetryHookInjector {
         return transformers;
     }
 
+    /**
+     * @param inst {@link Instrumentation} object that created the transformers
+     * @param transformers ArrayList of {@link ClassFileTransformer} objects created by the agent
+     * @see #injectMixins(Instrumentation, ArrayList)
+     * @since 1.0.0
+     */
     public static void ejectMixins(Instrumentation inst, ArrayList<ClassFileTransformer> transformers) {
         for (ClassFileTransformer transformer : transformers) {
             try {

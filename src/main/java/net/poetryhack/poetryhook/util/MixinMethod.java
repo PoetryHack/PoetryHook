@@ -1,3 +1,7 @@
+/**
+ * Created: 07.10.2024
+ */
+
 package net.poetryhack.poetryhook.util;
 
 import net.poetryhack.poetryhook.annotations.Matcher;
@@ -8,6 +12,9 @@ import net.poetryhack.poetryhook.exceptions.PoetryHookException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+/**
+ * @since 1.0.0
+ */
 public class MixinMethod {
     protected final boolean returnFromHook;
     protected final Class<?> returnType;

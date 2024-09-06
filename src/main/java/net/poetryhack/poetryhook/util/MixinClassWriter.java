@@ -1,8 +1,15 @@
+/**
+ * Created: 08.1.2024
+ */
+
 package net.poetryhack.poetryhook.util;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 
+/**
+ * @since 1.0.0
+ */
 public class MixinClassWriter extends ClassWriter {
     public MixinClassWriter(ClassReader classReader, int flags) {
         super(classReader, flags);

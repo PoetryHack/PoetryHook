@@ -1,3 +1,7 @@
+/**
+ * Created: 07.11.2024
+ */
+
 package net.poetryhack.poetryhook.annotations;
 
 import net.poetryhack.poetryhook.exceptions.PoetryHookException;
@@ -6,6 +10,9 @@ import net.poetryhack.poetryhook.util.MixinType;
 
 import java.lang.reflect.Method;
 
+/**
+ * @since 1.0.0
+ */
 public class MixinInfo {
     public static MixinInfo fromInject(Inject inject) {
         return new MixinInfo(inject.injectLocation(),

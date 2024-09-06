@@ -1,3 +1,7 @@
+/**
+ * Created: 03.29.2024
+ */
+
 package net.poetryhack.poetryhook;
 
 import net.poetryhack.poetryhook.annotations.Inject;
@@ -10,9 +14,18 @@ import org.objectweb.asm.Opcodes;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
+/**
+ * Interface to implement when creating a new mixin class
+ *
+ * @since 1.0.0
+ */
 @SuppressWarnings("unused")
 public interface MixinBase extends Opcodes {
 
+    /**
+     * @return ArrayList of {@link MixinMethod} contained by this mixin
+     * @since 1.0.0
+     */
     default ArrayList<MixinMethod> mixins() {
         ArrayList<MixinMethod> mixinsToReturn = new ArrayList<>();
 
