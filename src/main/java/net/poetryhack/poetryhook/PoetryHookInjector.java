@@ -12,7 +12,6 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -79,6 +78,7 @@ public final class PoetryHookInjector {
             });
         }
         tpe.shutdown();
+        //noinspection StatementWithEmptyBody
         while (tpe.getActiveCount() > 0) {}
 
         for (MixinMethod mixin : mixinMethods) {
