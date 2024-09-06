@@ -9,7 +9,6 @@ import net.poetryhack.poetryhook.annotations.Mixin;
 import net.poetryhack.poetryhook.annotations.Redirect;
 import net.poetryhack.poetryhook.exceptions.PoetryHookException;
 import net.poetryhack.poetryhook.util.MixinMethod;
-import org.objectweb.asm.Opcodes;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -22,7 +21,7 @@ import java.util.ArrayList;
  * @since 1.0.0
  */
 @SuppressWarnings("unused")
-public interface MixinBase extends Opcodes {
+public interface MixinBase {
 
     /**
      * @return ArrayList of {@link MixinMethod} contained by this mixin
