@@ -17,7 +17,8 @@ import java.util.HashMap;
 
 /**
  * @since 1.0.0
- * @author majorsopa & sootysplash
+ * @author majorsopa
+ * @author sootysplash
  */
 public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
     // sootysplash start
@@ -142,14 +143,15 @@ public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
     }
 
     /**
-     * @author majorsopa & sootysplash
+     * @author majorsopa
+     * @author sootysplash
      */
     private void callMethod(MixinMethod mixin) {
 
+        // majorsopa start
         Method methodToCall = mixin.methodToCall;
         StringBuilder sb = new StringBuilder();
 
-        // sootysplash start
         if (!mixin.isRedirect()) {
             sb.append("(");
             {
@@ -215,7 +217,9 @@ public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
         } else {
             sb.append(Type.getMethodDescriptor(methodToCall));
         }
+        // majorsopa end
 
+        // sootysplash start
         mixin.loaded = true;
 
         if (!mixin.isRedirect()) {

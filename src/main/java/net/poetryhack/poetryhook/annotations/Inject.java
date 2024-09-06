@@ -10,7 +10,7 @@ import java.lang.annotation.*;
 
 /**
  * @since 1.0.0
- * @author sootysplash
+ * @author majorsopa, significantly refactored by sootysplash
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
