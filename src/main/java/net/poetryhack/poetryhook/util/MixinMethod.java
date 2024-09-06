@@ -7,6 +7,7 @@ package net.poetryhack.poetryhook.util;
 import net.poetryhack.poetryhook.annotations.Matcher;
 import net.poetryhack.poetryhook.annotations.Mixin;
 import net.poetryhack.poetryhook.annotations.MixinInfo;
+import net.poetryhack.poetryhook.annotations.StringMixin;
 import net.poetryhack.poetryhook.exceptions.PoetryHookException;
 
 import java.lang.reflect.Method;
@@ -33,7 +34,20 @@ public class MixinMethod {
 
     public MixinMethod(Method method) {
         this.methodToCall = method;
-        this.injectTo = this.methodToCall.getDeclaringClass().getAnnotation(Mixin.class).value();
+        {
+            Class<?> injectTo0;
+            try {
+                injectTo0 = this.methodToCall.getDeclaringClass().getAnnotation(Mixin.class).value();
+            } catch (NullPointerException ignored) {
+                String clazzName = this.methodToCall.getDeclaringClass().getAnnotation(StringMixin.class).value();
+                try {
+                    injectTo0 = ClassLoader.getSystemClassLoader().loadClass(clazzName);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            injectTo = injectTo0;
+        }
         this.annotation = MixinInfo.get(this.methodToCall);
         this.type = this.annotation.mixinType;
         this.matcher = this.annotation.matcher;

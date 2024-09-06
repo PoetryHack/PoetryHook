@@ -7,6 +7,7 @@ package net.poetryhack.poetryhook;
 import net.poetryhack.poetryhook.annotations.Inject;
 import net.poetryhack.poetryhook.annotations.Mixin;
 import net.poetryhack.poetryhook.annotations.Redirect;
+import net.poetryhack.poetryhook.annotations.StringMixin;
 import net.poetryhack.poetryhook.exceptions.PoetryHookException;
 import net.poetryhack.poetryhook.util.MixinMethod;
 
@@ -16,7 +17,7 @@ import java.util.ArrayList;
 /**
  * Interface to implement when creating a new mixin class
  *
- * @author majorsopa, fully rewritten by sootysplash
+ * @author majorsopa, rewritten by sootysplash
  *
  * @since 1.0.0
  */
@@ -27,12 +28,16 @@ public interface MixinBase {
      * @return ArrayList of {@link MixinMethod} contained by this mixin
      * @since 1.0.0
      * @author sootysplash
+     * @author majorsopa
      */
     default ArrayList<MixinMethod> mixins() {
         ArrayList<MixinMethod> mixinsToReturn = new ArrayList<>();
 
-        if (!this.getClass().isAnnotationPresent(Mixin.class)) {
-            throw new PoetryHookException("Mixin declared without @Mixin annotation!\nClass: " + this.getClass().getName());// revised by major sopa
+        if (!(
+                this.getClass().isAnnotationPresent(Mixin.class)
+                || this.getClass().isAnnotationPresent(StringMixin.class)
+        )) {
+            throw new PoetryHookException("Mixin declared without @Mixin or @StringMixin annotation!\nClass: " + this.getClass().getName());// revised by majorsopa
         }
 
         for (Method method : this.getClass().getDeclaredMethods()) {
