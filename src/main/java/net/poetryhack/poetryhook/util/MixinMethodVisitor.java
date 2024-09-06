@@ -146,10 +146,10 @@ public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
      */
     private void callMethod(MixinMethod mixin) {
 
+        // majorsopa start
         Method methodToCall = mixin.methodToCall;
         StringBuilder sb = new StringBuilder();
 
-        // sootysplash start
         if (!mixin.isRedirect()) {
             sb.append("(");
             {
@@ -215,7 +215,9 @@ public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
         } else {
             sb.append(Type.getMethodDescriptor(methodToCall));
         }
+        // majorsopa end
 
+        // sootysplash start
         mixin.loaded = true;
 
         if (!mixin.isRedirect()) {
