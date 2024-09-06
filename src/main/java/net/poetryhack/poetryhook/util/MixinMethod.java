@@ -54,13 +54,16 @@ public class MixinMethod {
         this.fieldName = this.matcher.field_name();
         this.methodName = this.annotation.value;
 
-        Class<?>[] annotClasses = this.annotation.toHookArgs;
-        boolean isAnnotation = annotClasses.length != 0 || this.annotation.forceUseAnnotationArgs;
-        Class<?>[] params = this.methodToCall.getParameterTypes();
-        if (!isAnnotation && params[0] == this.injectTo) {
-            params = Arrays.copyOfRange(params, 1, params.length);
-        }
-        Class<?>[] clazzes = isAnnotation ? annotClasses : params;
+        Class<?>[] clazzes = {};
+        try {
+            Class<?>[] annotClasses = this.annotation.toHookArgs;
+            boolean isAnnotation = annotClasses.length != 0 || this.annotation.forceUseAnnotationArgs;
+            Class<?>[] params = this.methodToCall.getParameterTypes();
+            if (!isAnnotation && params[0] == this.injectTo) {
+                params = Arrays.copyOfRange(params, 1, params.length);
+            }
+            clazzes = isAnnotation ? annotClasses : params;
+        } catch (ArrayIndexOutOfBoundsException ignored) {}  // todo make the program control flow not rely on try-catch
 
         try {
             this.returnType = this.injectTo.getDeclaredMethod(this.methodName, clazzes).getReturnType();
