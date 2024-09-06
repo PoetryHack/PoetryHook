@@ -12,6 +12,8 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Utility class to handle the boilerplate of injection and ejection
@@ -32,6 +34,8 @@ public final class PoetryHookInjector {
         ArrayList<Class<?>> classesToRetransform = new ArrayList<>();
         HashMap<Class<?>, MixinMethod[]> mixinsForClass = new HashMap<>();
 
+        ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors.newFixedThreadPool(mixinBases.size());
+
         for (MixinMethod mixin : mixinBases) {
             try {
                 MixinClassFileTransformer transformer = new MixinClassFileTransformer(mixin);
@@ -51,12 +55,18 @@ public final class PoetryHookInjector {
             }
         }
         for (Class<?> clazz : classesToRetransform) {
-            try {
-                inst.retransformClasses(clazz);
-            } catch (Throwable e) {
-                throw new PoetryHookException(e);
-            }
+            tpe.execute(() -> {
+                synchronized (clazz) {
+                    try {
+                        inst.retransformClasses(clazz);
+                    } catch (Throwable e) {
+                        throw new PoetryHookException(e);
+                    }
+                }
+            });
         }
+        tpe.shutdown();
+        while (tpe.getActiveCount() > 0) {}
 
         for (MixinMethod mixin : mixinBases) {
             if (!mixin.loaded) {
