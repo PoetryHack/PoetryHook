@@ -32,7 +32,7 @@ public final class PoetryHookInjector {
      * @since 1.0.0
      * @author majorsopa, revised by sootysplash
      */
-    public static ArrayList<ClassFileTransformer> injectMixins(Instrumentation inst, Collection<MixinBase> mixinBases) {
+    public static ArrayList<ClassFileTransformer> injectMixins(Instrumentation inst, MixinBase ... mixinBases) {
         HashMap<Class<?>, MixinMethod[]> mixinsForClass = new HashMap<>();
 
         ArrayList<MixinMethod> mixinMethods = new ArrayList<>();
@@ -64,7 +64,7 @@ public final class PoetryHookInjector {
             }
         }
 
-        ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors.newFixedThreadPool(mixinBases.size());
+        ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors.newFixedThreadPool(mixinBases.length);
 
         for (Class<?> clazz : classesToRetransform) {
             tpe.execute(() -> {
@@ -94,7 +94,7 @@ public final class PoetryHookInjector {
     /**
      * @param inst {@link Instrumentation} object that created the transformers
      * @param transformers ArrayList of {@link ClassFileTransformer} objects created by the agent
-     * @see #injectMixins(Instrumentation, Collection)
+     * @see #injectMixins(Instrumentation, MixinBase...)
      * @since 1.0.0
      * @author majorsopa
      */
