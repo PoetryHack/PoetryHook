@@ -1,5 +1,6 @@
 package net.poetryhack.poetryhook;
 
+import net.poetryhack.poetryhook.exceptions.PoetryHookException;
 import net.poetryhack.poetryhook.util.MixinClassFileTransformer;
 import net.poetryhack.poetryhook.util.MixinMethod;
 
@@ -19,9 +20,10 @@ public final class PoetryHookInjector {
             try {
                 MixinClassFileTransformer transformer = new MixinClassFileTransformer(mixin);
                 transformers.add(transformer);
+                inst.addTransformer(transformer, true);
+
                 Class<?> injectTo = mixin.injectTo;
                 classesToRetransform.add(injectTo);
-                inst.addTransformer(transformer, true);
 
                 MixinMethod[] mms = mixinsForClass.getOrDefault(injectTo, new MixinMethod[]{});
                 MixinMethod[] to = new MixinMethod[mms.length + 1];
@@ -29,21 +31,20 @@ public final class PoetryHookInjector {
                 to[mms.length] = mixin;
                 mixinsForClass.put(injectTo, to);
             } catch (Throwable e) {
-//                e.printStackTrace(System.err);
+                e.printStackTrace(System.err);
             }
         }
         for (Class<?> clazz : classesToRetransform) {
             try {
                 inst.retransformClasses(clazz);
             } catch (Throwable e) {
-//                        e.printStackTrace(System.err);
-//                        System.err.println("Mixins for class: " + Arrays.toString(mixinsForClass.getOrDefault(clazz, new MixinMethod[]{})));
+                throw new PoetryHookException(e);
             }
         }
 
         for (MixinMethod mixin : mixinBases) {
             if (!mixin.loaded) {
-//                System.out.println("Failed to inject Mixin: " + mixin.methodToCall.getDeclaringClass().getName() + " / " + mixin.methodToCall.getName());
+                throw new PoetryHookException("Failed to inject Mixin: " + mixin.methodToCall.getDeclaringClass().getName() + " / " + mixin.methodToCall.getName());
             }
         }
 
@@ -55,7 +56,7 @@ public final class PoetryHookInjector {
             try {
                 inst.removeTransformer(transformer);
             } catch (Throwable e) {
-                e.printStackTrace(System.err);
+                throw new PoetryHookException(e);
             }
         }
     }

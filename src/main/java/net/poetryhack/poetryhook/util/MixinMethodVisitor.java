@@ -2,6 +2,7 @@ package net.poetryhack.poetryhook.util;
 
 import net.poetryhack.poetryhook.annotations.ShouldReturn;
 import net.poetryhack.poetryhook.annotations.ToReturn;
+import net.poetryhack.poetryhook.exceptions.PoetryHookException;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -35,7 +36,8 @@ public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
             wrapperPrimMethod.put(float.class, Float.class.getDeclaredMethod("floatValue"));
             wrapperPrimMethod.put(double.class, Double.class.getDeclaredMethod("doubleValue"));
             wrapperPrimMethod.put(char.class, Character.class.getDeclaredMethod("charValue"));
-        } catch (NoSuchMethodException ignored) {// shouldn't happen
+        } catch (NoSuchMethodException e) {// shouldn't happen
+            throw new PoetryHookException(e);
         }
     }
 

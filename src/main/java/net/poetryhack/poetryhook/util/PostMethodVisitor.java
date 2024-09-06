@@ -1,5 +1,6 @@
 package net.poetryhack.poetryhook.util;
 
+import net.poetryhack.poetryhook.exceptions.PoetryHookException;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
@@ -101,6 +102,7 @@ public class PostMethodVisitor extends MethodVisitor {
                 }
             } catch (Exception e) {
 //                e.printStackTrace(System.out);
+                throw new PoetryHookException(e);
             }
         }
         return opName;
