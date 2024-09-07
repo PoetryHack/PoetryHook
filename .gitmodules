@@ -1,0 +1,3 @@
+[submodule "PoetryHookExamples"]
+	path = PoetryHookExamples
+	url = https://github.com/PoetryHack/PoetryHookExamples
