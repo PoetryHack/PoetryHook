@@ -34,36 +34,32 @@ public class MixinMethod {
 
     public MixinMethod(Method method) {
         this.methodToCall = method;
-        {
-            Class<?> injectTo0;
+
+        Class<?> declaringClass = this.methodToCall.getDeclaringClass();
+        // Annotations are checked by MixinBase.mixins()
+        if (declaringClass.isAnnotationPresent(StringMixin.class)) {
             try {
-                injectTo0 = this.methodToCall.getDeclaringClass().getAnnotation(Mixin.class).value();
-            } catch (NullPointerException ignored) {
-                String clazzName = this.methodToCall.getDeclaringClass().getAnnotation(StringMixin.class).value();
-                try {
-                    injectTo0 = ClassLoader.getSystemClassLoader().loadClass(clazzName);
-                } catch (ClassNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
+                injectTo = MixinMethod.class.getClassLoader().loadClass(declaringClass.getAnnotation(StringMixin.class).value());
+            } catch (ClassNotFoundException e) {
+                throw new PoetryHookException(e);
             }
-            injectTo = injectTo0;
+        } else {
+            injectTo = declaringClass.getAnnotation(Mixin.class).value();
         }
+
         this.annotation = MixinInfo.get(this.methodToCall);
         this.type = this.annotation.mixinType;
         this.matcher = this.annotation.matcher;
         this.fieldName = this.matcher.field_name();
         this.methodName = this.annotation.value;
 
-        Class<?>[] clazzes = {};
-        try {
-            Class<?>[] annotClasses = this.annotation.toHookArgs;
-            boolean isAnnotation = annotClasses.length != 0 || this.annotation.forceUseAnnotationArgs;
-            Class<?>[] params = this.methodToCall.getParameterTypes();
-            if (!isAnnotation && params[0] == this.injectTo) {
-                params = Arrays.copyOfRange(params, 1, params.length);
-            }
-            clazzes = isAnnotation ? annotClasses : params;
-        } catch (ArrayIndexOutOfBoundsException ignored) {}  // todo make the program control flow not rely on try-catch
+        Class<?>[] annotClasses = this.annotation.toHookArgs;
+        boolean isAnnotation = annotClasses.length != 0 || this.annotation.forceUseAnnotationArgs;
+        Class<?>[] params = this.methodToCall.getParameterTypes();
+        if (!isAnnotation && params.length > 0 && params[0] == this.injectTo) {
+            params = Arrays.copyOfRange(params, 1, params.length);
+        }
+        Class<?>[] clazzes = isAnnotation ? annotClasses : params;
 
         try {
             this.returnType = this.injectTo.getDeclaredMethod(this.methodName, clazzes).getReturnType();
@@ -73,15 +69,16 @@ public class MixinMethod {
 
         this.returnFromHook = this.annotation.returnFromHook;
         this.location = this.annotation.location;
-        if (this.location.equals(InjectLocation.MATCH_METHOD)) {
-            try {
-                String methodName = this.matcher.method_name();
-                this.match_method = this.matcher.method_class().getDeclaredMethod(methodName, this.matcher.method_parameters());
-            } catch (NoSuchMethodException e) {
-                throw new PoetryHookException(e);// revised by majorsopa
-            }
-        }
         this.opcode = this.matcher.match_opcode();
+        if (!this.location.equals(InjectLocation.MATCH_METHOD)) {
+            return;
+        }
+        try {
+            String methodName = this.matcher.method_name();
+            this.match_method = this.matcher.method_class().getDeclaredMethod(methodName, this.matcher.method_parameters());
+        } catch (NoSuchMethodException e) {
+            throw new PoetryHookException(e);// revised by majorsopa
+        }
     }
     protected boolean match_opcode(int opcode) {
         return this.opcode == -1 || this.opcode == opcode;

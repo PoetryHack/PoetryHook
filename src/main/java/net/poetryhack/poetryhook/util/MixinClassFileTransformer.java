@@ -39,39 +39,76 @@ public class MixinClassFileTransformer implements ClassFileTransformer {
 
         for (Class<?> clazz : clazzes) {
             switch (clazz.getName()) {
-                case "int" -> methodSigSb.append("I");
-                case "long" -> methodSigSb.append("J");
-                case "float" -> methodSigSb.append("F");
-                case "double" -> methodSigSb.append("D");
-                case "byte" -> methodSigSb.append("B");
-                case "char" -> methodSigSb.append("C");
-                case "short" -> methodSigSb.append("S");
-                case "boolean" -> methodSigSb.append("Z");
-                case "" -> {}
-                default -> {
-                    methodSigSb.append("L").append(clazz.getName().replace(".", "/"));
-//                    if (clazz.getTypeParameters().length > 0) methodSigSb.append("<*>"); //revised by sootysplash
+                case "int":
+                    methodSigSb.append("I");
+                    break;
+                case "long":
+                    methodSigSb.append("J");
+                    break;
+                case "float":
+                    methodSigSb.append("F");
+                    break;
+                case "double":
+                    methodSigSb.append("D");
+                    break;
+                case "byte":
+                    methodSigSb.append("B");
+                    break;
+                case "char":
+                    methodSigSb.append("C");
+                    break;
+                case "short":
+                    methodSigSb.append("S");
+                    break;
+                case "boolean":
+                    methodSigSb.append("Z");
+                    break;
+                default:
+                    methodSigSb.append("L");
+                    methodSigSb.append(clazz.getName().replace(".", "/"));
                     methodSigSb.append(";");
-                }
+
             }
         }
         methodSigSb.append(")");
 
-        {
-            Class<?> retType = mixin.returnType;
-            switch (retType.getName()) {
-                case "int" -> methodSigSb.append("I");
-                case "long" -> methodSigSb.append("J");
-                case "float" -> methodSigSb.append("F");
-                case "double" -> methodSigSb.append("D");
-                case "byte" -> methodSigSb.append("B");
-                case "char" -> methodSigSb.append("C");
-                case "short" -> methodSigSb.append("S");
-                case "boolean" -> methodSigSb.append("Z");
-                case "void" -> methodSigSb.append("V");
-                default -> methodSigSb.append("L").append(retType.getName().replace(".", "/")).append(";");
-            }
+
+        Class<?> retType = mixin.returnType;
+        switch (retType.getName()) {
+            case "int":
+                methodSigSb.append("I");
+                break;
+            case "long":
+                methodSigSb.append("J");
+                break;
+            case "float":
+                methodSigSb.append("F");
+                break;
+            case "double":
+                methodSigSb.append("D");
+                break;
+            case "byte":
+                methodSigSb.append("B");
+                break;
+            case "char":
+                methodSigSb.append("C");
+                break;
+            case "short":
+                methodSigSb.append("S");
+                break;
+            case "boolean":
+                methodSigSb.append("Z");
+                break;
+            case "void":
+                methodSigSb.append("V");
+                break;
+            default:
+                methodSigSb.append("L");
+                methodSigSb.append(retType.getName().replace(".", "/"));
+                methodSigSb.append(";");
+
         }
+
         this.methodSig = methodSigSb.toString();
     }
 
@@ -91,11 +128,11 @@ public class MixinClassFileTransformer implements ClassFileTransformer {
                     MixinClassWriter postWriter = new MixinClassWriter(postReader, 0);
                     postReader.accept(new MixinClassVisitor(postWriter, this.mixin, this.methodName, this.methodSig, true), 0);
                     postWriter.visitEnd();
-                }  // todo why is this not used at all
+                }
 
                 return data;
             } catch (Exception e) {
-                throw new PoetryHookException(e);
+                e.printStackTrace(System.err); // revised by sootysplash, simply rethrowing the exception will cause the exception to be lost (and harder to debug)
             }
         }
 

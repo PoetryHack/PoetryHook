@@ -29,7 +29,7 @@ public class MixinClassVisitor extends ClassVisitor {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-        if (name.equals(this.methodName) && (/*wtf || */descriptor.equals(this.methodSignature))) {
+        if (name.equals(this.methodName) && descriptor.equals(this.methodSignature)) {
             // sootysplash start
             if (!isPost) {
                 return new MixinMethodVisitor(super.visitMethod(access, name, descriptor, signature, exceptions), this.mixin);

@@ -158,61 +158,81 @@ public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
                 int methodI = 0;
                 for (Class<?> clazz : methodToCall.getParameterTypes()) {
                     switch (clazz.getName()) {
-                        case "int" -> {
+                        case "int":
                             sb.append("I");
                             super.visitVarInsn(ILOAD, methodI);
-                        }
-                        case "long" -> {
+                            break;
+                        case "long":
                             sb.append("J");
                             super.visitVarInsn(LLOAD, methodI);
                             methodI++;
-                        }
-                        case "float" -> {
+                            break;
+                        case "float":
                             sb.append("F");
                             super.visitVarInsn(FLOAD, methodI);
-                        }
-                        case "double" -> {
+                            break;
+                        case "double":
                             sb.append("D");
                             super.visitVarInsn(DLOAD, methodI);
-                        }
-                        case "byte" -> {
+                            break;
+                        case "byte":
                             sb.append("B");
                             super.visitVarInsn(ILOAD, methodI);
-                        }
-                        case "char" -> {
+                            break;
+                        case "char":
                             sb.append("C");
                             super.visitVarInsn(ILOAD, methodI);
-                        }
-                        case "short" -> {
+                            break;
+                        case "short":
                             sb.append("S");
                             super.visitVarInsn(ILOAD, methodI);
-                        }
-                        case "boolean" -> {
+                            break;
+                        case "boolean":
                             sb.append("Z");
                             super.visitVarInsn(ILOAD, methodI);
-                        }
-                        case "" -> {}
-                        default -> {
+                            break;
+                        default:
                             sb.append("L").append(clazz.getName().replace(".", "/")).append(";");
                             // investigate if variadic needed here
                             super.visitVarInsn(ALOAD, methodI);
-                        }
                     }
                     methodI++;
                 }
             }
             sb.append(")");
             switch (methodToCall.getReturnType().getName()) {
-                case "int" -> sb.append("I");
-                case "long" -> sb.append("J");
-                case "float" -> sb.append("F");
-                case "double" -> sb.append("D");
-                case "byte" -> sb.append("B");
-                case "char" -> sb.append("C");
-                case "short" -> sb.append("S");
-                case "boolean" -> sb.append("Z");
-                case "void" -> sb.append("V");
-                default -> sb.append("L").append(methodToCall.getReturnType().getName().replace(".", "/")).append(";");
+                case "int":
+                    sb.append("I");
+                    break;
+                case "long":
+                    sb.append("J");
+                    break;
+                case "float":
+                    sb.append("F");
+                    break;
+                case "double":
+                    sb.append("D");
+                    break;
+                case "byte":
+                    sb.append("B");
+                    break;
+                case "char":
+                    sb.append("C");
+                    break;
+                case "short":
+                    sb.append("S");
+                    break;
+                case "boolean":
+                    sb.append("Z");
+                    break;
+                case "void":
+                    sb.append("V");
+                    break;
+                default:
+                    sb.append("L");
+                    sb.append(methodToCall.getReturnType().getName().replace(".", "/"));
+                    sb.append(";");
+
             }
         } else {
             sb.append(Type.getMethodDescriptor(methodToCall));
@@ -254,12 +274,7 @@ public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
                     toReturn = me;
                 }
             }
-            boolean pop = shouldReturn == null;
-            if (toReturn == null) {
-                pop = true;
-            }
-
-            if (pop) {
+            if (shouldReturn == null || toReturn == null) {
                 super.visitInsn(POP);
                 return;
             }
@@ -337,12 +352,27 @@ public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
 
             // majorsopa start
             switch (mixin.returnType.getName()) {
-                case "int", "byte", "char", "short", "boolean" -> super.visitInsn(IRETURN);
-                case "long" -> super.visitInsn(LRETURN);
-                case "float" -> super.visitInsn(FRETURN);
-                case "double" -> super.visitInsn(DRETURN);
-                case "void" -> super.visitInsn(RETURN);
-                default -> super.visitInsn(ARETURN);
+                case "int":
+                case "byte":
+                case "char":
+                case "short":
+                case "boolean":
+                    super.visitInsn(IRETURN);
+                    break;
+                case "long":
+                    super.visitInsn(LRETURN);
+                    break;
+                case "float":
+                    super.visitInsn(FRETURN);
+                    break;
+                case "double":
+                    super.visitInsn(DRETURN);
+                    break;
+                case "void":
+                    super.visitInsn(RETURN);
+                    break;
+                default:
+                    super.visitInsn(ARETURN);
             }
 
             this.visitLabel(label3);
@@ -355,12 +385,16 @@ public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
      */
     private boolean isAReturn(int opcode) {
         switch (opcode) {
-            case IRETURN, LRETURN, FRETURN, DRETURN, ARETURN, RETURN -> {
+            case IRETURN:
+            case LRETURN:
+            case FRETURN:
+            case DRETURN:
+            case ARETURN:
+            case RETURN:
                 return true;
-            }
-            default -> {
+            default:
                 return false;
-            }
+
         }
     }
 }

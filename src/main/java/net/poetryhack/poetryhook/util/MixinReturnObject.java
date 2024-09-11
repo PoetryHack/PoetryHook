@@ -34,8 +34,8 @@ public class MixinReturnObject {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof MixinReturnObject that)) return false;
-        return shouldReturn == that.shouldReturn && Objects.equals(object, that.object);
+        if (!(o instanceof MixinReturnObject)) return false;
+        return shouldReturn == ((MixinReturnObject)o).shouldReturn && Objects.equals(object, ((MixinReturnObject)o).object);
     }
     @Override
     public int hashCode() {

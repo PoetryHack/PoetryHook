@@ -33,7 +33,7 @@ public final class PoetryHookInjector {
     public static ArrayList<Class<?>> injectMixins(Instrumentation inst, boolean unregisterTransformersImmediately, MixinBase ... mixinBases) {
         HashMap<Class<?>, MixinMethod[]> mixinsForClass = new HashMap<>();
 
-        ArrayList<MixinMethod> mixinMethods = new ArrayList<>();
+        ArrayList<MixinMethod> mixinMethods = new ArrayList<>(mixinBases.length * 2);
         for (MixinBase base : mixinBases) {
             mixinMethods.addAll(base.mixins());
         }
