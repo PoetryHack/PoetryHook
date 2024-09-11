@@ -31,7 +31,7 @@ public class MixinClassFileTransformer implements ClassFileTransformer {
         Class<?>[] annotation = mixin.annotation.toHookArgs;
         boolean isAnnotation = annotation.length != 0 || mixin.annotation.forceUseAnnotationArgs;
         Class<?>[] params = this.mixin.methodToCall.getParameterTypes();
-        if (!isAnnotation && params[0] == this.mixin.injectTo) {
+        if (params.length > 0 && !isAnnotation && params[0] == this.mixin.injectTo) {  // modded by majorsopa to avoid ArrayIndexOutOfBoundsException
             params = Arrays.copyOfRange(params, 1, params.length);
         }
         Class<?>[] clazzes = isAnnotation ? annotation : params;
@@ -91,7 +91,7 @@ public class MixinClassFileTransformer implements ClassFileTransformer {
                     MixinClassWriter postWriter = new MixinClassWriter(postReader, 0);
                     postReader.accept(new MixinClassVisitor(postWriter, this.mixin, this.methodName, this.methodSig, true), 0);
                     postWriter.visitEnd();
-                }
+                }  // todo why is this not used at all
 
                 return data;
             } catch (Exception e) {

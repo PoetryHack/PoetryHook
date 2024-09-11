@@ -11,10 +11,7 @@ import net.poetryhack.poetryhook.util.MixinMethod;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Utility class to handle the boilerplate of injection and ejection
@@ -26,13 +23,14 @@ import java.util.concurrent.ThreadPoolExecutor;
 public final class PoetryHookInjector {
     /**
      * @param inst {@link Instrumentation} object of the agent
+     * @param unregisterTransformersImmediately if the transformers should be removed immediately after injection
      * @param mixinBases {@link MixinMethod} subclass objects to inject
-     * @return ArrayList of {@link ClassFileTransformer} objects which can be used for ejection
+     * @return ArrayList of {@link Class} objects which can be used for ejection
      * @see #ejectMixins(Instrumentation, ArrayList)
      * @since 1.0.0
      * @author majorsopa, revised by sootysplash
      */
-    public static ArrayList<ClassFileTransformer> injectMixins(Instrumentation inst, MixinBase ... mixinBases) {
+    public static ArrayList<Class<?>> injectMixins(Instrumentation inst, boolean unregisterTransformersImmediately, MixinBase ... mixinBases) {
         HashMap<Class<?>, MixinMethod[]> mixinsForClass = new HashMap<>();
 
         ArrayList<MixinMethod> mixinMethods = new ArrayList<>();
@@ -64,7 +62,7 @@ public final class PoetryHookInjector {
             }
         }
 
-        retransformAllRelevantClasses(inst, classesToRetransform, mixinsForClass, mixinBases.length);
+        retransformAllRelevantClasses(inst, classesToRetransform);
 
         for (MixinMethod mixin : mixinMethods) {
             if (!mixin.loaded) {
@@ -73,14 +71,19 @@ public final class PoetryHookInjector {
         }
         // sootysplash end
 
-        return transformers;
+        if (unregisterTransformersImmediately) {
+            ejectMixins(inst, transformers);
+        }
+
+        return classesToRetransform;
     }
 
     /**
+     * Removes the transformers for all mixins and retransforms classes
      * @param inst {@link Instrumentation} object that created the transformers
      * @param transformers ArrayList of {@link ClassFileTransformer} objects created by the agent
-     * @see #injectMixins(Instrumentation, MixinBase...)
-     * @see #retransformAllRelevantClasses(Instrumentation, ArrayList, HashMap, int)
+     * @see #injectMixins(Instrumentation, boolean, MixinBase...)
+     * @see #retransformAllRelevantClasses(Instrumentation, ArrayList)
      * @since 1.0.0
      * @author majorsopa
      */
@@ -97,33 +100,20 @@ public final class PoetryHookInjector {
     /**
      * @param inst Agent {@link Instrumentation} object
      * @param classesToRetransform {@link ArrayList} of classes that are to be retransformed
-     * @param mixinsForClass {@link HashMap} of {@link Class} keys to {@link MixinMethod} arrays which are the mixins for the classes being hooked
-     * @param poolLength {@link int} for the size of {@link ThreadPoolExecutor} made for async retransformation
      * @since 1.0.0
      * @author sootysplash, seperated into api method by majorsopa
      */
     public static void retransformAllRelevantClasses(
             Instrumentation inst,
-            ArrayList<Class<?>> classesToRetransform,
-            HashMap<Class<?>, MixinMethod[]> mixinsForClass,
-            int poolLength
+            ArrayList<Class<?>> classesToRetransform
     ) {
-        ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors.newFixedThreadPool(poolLength);
-
         for (Class<?> clazz : classesToRetransform) {
-            tpe.execute(() -> {
-                synchronized (clazz) {
-                    try {
-                        inst.retransformClasses(clazz); // majorsopa
-                    } catch (Throwable e) {
-                        System.err.println("Mixins for class: " + Arrays.toString(mixinsForClass.getOrDefault(clazz, new MixinMethod[]{})));
-                        throw new PoetryHookException(e);
-                    }
-                }
-            });
+            try {
+                inst.retransformClasses(clazz); // majorsopa
+            } catch (Throwable e) {
+                System.err.println("Error when transforming " + clazz.getName());
+                throw new PoetryHookException(e);
+            }
         }
-        tpe.shutdown();
-        //noinspection StatementWithEmptyBody
-        while (tpe.getActiveCount() > 0) {}
     }
 }
