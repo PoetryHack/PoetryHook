@@ -11,8 +11,8 @@ import java.lang.instrument.ClassFileTransformer;
 import java.util.Arrays;
 
 /**
- * @since 1.0.0
  * @author majorsopa, revised by sootysplash
+ * @since 1.0.0
  */
 public final class MixinClassFileTransformer implements ClassFileTransformer {
     private final MixinMethod mixin;

@@ -14,23 +14,23 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 /**
- * @since 1.0.0
  * @author sootysplash, revised by majorsopa
+ * @since 1.0.0
  */
 public class MixinMethod {
+    public final MixinInfo annotation;
+    public final Method methodToCall;
+    public final Class<?> injectTo;
     protected final boolean returnFromHook;
     protected final Class<?> returnType;
     protected final Matcher matcher;
-    protected MixinType type;
     protected final InjectLocation location;
+    public boolean loaded = false;
+    protected MixinType type;
     protected int opcode;
     protected Method match_method;
     protected String fieldName;
     protected String methodName;
-    public final MixinInfo annotation;
-    public final Method methodToCall;
-    public final Class<?> injectTo;
-    public boolean loaded = false;
 
     public MixinMethod(Method method) {
         this.methodToCall = method;
@@ -80,12 +80,15 @@ public class MixinMethod {
             throw new PoetryHookException(e);// revised by majorsopa
         }
     }
+
     protected boolean match_opcode(int opcode) {
         return this.opcode == -1 || this.opcode == opcode;
     }
+
     protected boolean isInject() {
         return type == MixinType.Inject;
     }
+
     protected boolean isRedirect() {
         return type == MixinType.Redirect;
     }

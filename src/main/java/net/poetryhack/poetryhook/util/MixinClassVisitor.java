@@ -10,8 +10,8 @@ import org.objectweb.asm.MethodVisitor;
 import static org.objectweb.asm.Opcodes.ASM9;
 
 /**
- * @since 1.0.0
  * @author majorsopa, revised by sootysplash
+ * @since 1.0.0
  */
 public final class MixinClassVisitor extends ClassVisitor {
     private final String methodName;

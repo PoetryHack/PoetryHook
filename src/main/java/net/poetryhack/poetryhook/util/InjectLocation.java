@@ -5,9 +5,9 @@
 package net.poetryhack.poetryhook.util;
 
 /**
- * @since 1.0.0
  * @author majorsopa
  * @author sootysplash
+ * @since 1.0.0
  */
 public enum InjectLocation {
     // majorsopa start

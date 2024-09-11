@@ -11,38 +11,10 @@ import net.poetryhack.poetryhook.util.MixinType;
 import java.lang.reflect.Method;
 
 /**
- * @since 1.0.0
  * @author sootysplash
+ * @since 1.0.0
  */
 public final class MixinInfo {
-    public static MixinInfo fromInject(Inject inject) {
-        return new MixinInfo(inject.injectLocation(),
-                inject.value(),
-                inject.toHookArgs(),
-                inject.returnFromHook(),
-                inject.forceUseAnnotationArgs(),
-                inject.matcher(),
-                MixinType.Inject);
-    }
-    public static MixinInfo fromRedirect(Redirect redirect) {
-        return new MixinInfo(redirect.injectLocation(),
-                redirect.value(),
-                redirect.toHookArgs(),
-                false,
-                redirect.forceUseAnnotationArgs(),
-                redirect.matcher(),
-                MixinType.Redirect);
-    }
-    public static MixinInfo get(Method method) {
-        if (method.isAnnotationPresent(Inject.class)) {
-            return fromInject(method.getAnnotation(Inject.class)).setPostIfPresent(method);
-        } else if (method.isAnnotationPresent(Redirect.class)) {
-            return fromRedirect(method.getAnnotation(Redirect.class)).setPostIfPresent(method);
-        } else {
-            throw new PoetryHookException("Method passed without @Inject or @Redirect!\n" +
-                    "Method: " + method.getName() + " Declaring Class: " + method.getDeclaringClass().getName());
-        }
-    }
     public final InjectLocation location;
     public final String value;
     public final Class<?>[] toHookArgs;
@@ -66,6 +38,38 @@ public final class MixinInfo {
         this.matcher = matcher;
         this.mixinType = mixinType;
     }
+
+    public static MixinInfo fromInject(Inject inject) {
+        return new MixinInfo(inject.injectLocation(),
+                inject.value(),
+                inject.toHookArgs(),
+                inject.returnFromHook(),
+                inject.forceUseAnnotationArgs(),
+                inject.matcher(),
+                MixinType.Inject);
+    }
+
+    public static MixinInfo fromRedirect(Redirect redirect) {
+        return new MixinInfo(redirect.injectLocation(),
+                redirect.value(),
+                redirect.toHookArgs(),
+                false,
+                redirect.forceUseAnnotationArgs(),
+                redirect.matcher(),
+                MixinType.Redirect);
+    }
+
+    public static MixinInfo get(Method method) {
+        if (method.isAnnotationPresent(Inject.class)) {
+            return fromInject(method.getAnnotation(Inject.class)).setPostIfPresent(method);
+        } else if (method.isAnnotationPresent(Redirect.class)) {
+            return fromRedirect(method.getAnnotation(Redirect.class)).setPostIfPresent(method);
+        } else {
+            throw new PoetryHookException("Method passed without @Inject or @Redirect!\n" +
+                    "Method: " + method.getName() + " Declaring Class: " + method.getDeclaringClass().getName());
+        }
+    }
+
     private MixinInfo setPostIfPresent(Method method) {
         if (method.isAnnotationPresent(CheckPost.class)) {
             this.isPost = true;

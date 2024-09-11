@@ -5,8 +5,8 @@
 package net.poetryhack.poetryhook.util;
 
 /**
- * @since 1.0.0
  * @author sootysplash
+ * @since 1.0.0
  */
 public enum MixinType {
     Inject,
