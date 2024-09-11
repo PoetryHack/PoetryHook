@@ -4,7 +4,6 @@
 
 package net.poetryhack.poetryhook.util;
 
-import net.poetryhack.poetryhook.exceptions.PoetryHookException;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 
@@ -15,7 +14,7 @@ import java.util.Arrays;
  * @since 1.0.0
  * @author majorsopa, revised by sootysplash
  */
-public class MixinClassFileTransformer implements ClassFileTransformer {
+public final class MixinClassFileTransformer implements ClassFileTransformer {
     private final MixinMethod mixin;
     private final String className;
     private final String methodName;

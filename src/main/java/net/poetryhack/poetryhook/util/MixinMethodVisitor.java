@@ -20,7 +20,7 @@ import java.util.HashMap;
  * @author majorsopa
  * @author sootysplash
  */
-public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
+public final class MixinMethodVisitor extends MethodVisitor implements Opcodes {
     // sootysplash start
     private static short index = 256;
     public static final HashMap<Class<?>, Class<?>> primToWrapper = new HashMap<>();

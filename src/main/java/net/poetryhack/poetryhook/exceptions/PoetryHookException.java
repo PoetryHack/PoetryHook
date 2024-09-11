@@ -8,7 +8,7 @@ package net.poetryhack.poetryhook.exceptions;
  * @since 1.0.0
  * @author majorsopa
  */
-public class PoetryHookException extends RuntimeException {
+public final class PoetryHookException extends RuntimeException {
     public PoetryHookException(String message) {
         super(message);
     }

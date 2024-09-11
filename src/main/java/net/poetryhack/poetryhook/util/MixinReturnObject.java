@@ -13,7 +13,7 @@ import java.util.Objects;
  * @since 1.0.0
  * @author sootysplash
  */
-public class MixinReturnObject {
+public final class MixinReturnObject {
     private final Object object;
     private final boolean shouldReturn;
     public MixinReturnObject(Object object, boolean shouldReturn) {

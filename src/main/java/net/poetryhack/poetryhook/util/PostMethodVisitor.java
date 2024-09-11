@@ -20,7 +20,7 @@ import static org.objectweb.asm.Opcodes.ASM9;
  * @since 1.0.0
  * @author sootysplash
  */
-public class PostMethodVisitor extends MethodVisitor {
+public final class PostMethodVisitor extends MethodVisitor {
     private final HashMap<String, Integer> label2int = new HashMap<>();
     private int min = 0;
     private final StringBuffer sb = new StringBuffer();

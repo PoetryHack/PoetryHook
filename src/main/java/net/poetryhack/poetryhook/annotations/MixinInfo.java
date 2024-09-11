@@ -14,7 +14,7 @@ import java.lang.reflect.Method;
  * @since 1.0.0
  * @author sootysplash
  */
-public class MixinInfo {
+public final class MixinInfo {
     public static MixinInfo fromInject(Inject inject) {
         return new MixinInfo(inject.injectLocation(),
                 inject.value(),

@@ -11,7 +11,7 @@ import org.objectweb.asm.ClassWriter;
  * @since 1.0.0
  * @author sootysplash
  */
-public class MixinClassWriter extends ClassWriter {
+public final class MixinClassWriter extends ClassWriter {
     public MixinClassWriter(ClassReader classReader, int flags) {
         super(classReader, flags);
     }
