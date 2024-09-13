@@ -15,6 +15,7 @@ import java.util.HashMap;
 
 /**
  * Utility class to handle the boilerplate of injection and ejection
+ *
  * @author majorsopa
  * @author sootysplash
  * @since 1.0.0
@@ -22,18 +23,18 @@ import java.util.HashMap;
 @SuppressWarnings("unused")
 public final class PoetryHookInjector {
     /**
-     * @param inst {@link Instrumentation} object of the agent
+     * @param inst                              {@link Instrumentation} object of the agent
      * @param unregisterTransformersImmediately if the transformers should be removed immediately after injection
-     * @param mixinBases {@link MixinMethod} subclass objects to inject
+     * @param mixinBases                        {@link MixinMethod} subclass objects to inject
      * @return ArrayList of {@link Class} objects which can be used for ejection
+     * @author majorsopa, revised by sootysplash
      * @see #ejectMixins(Instrumentation, ArrayList)
      * @since 1.0.0
-     * @author majorsopa, revised by sootysplash
      */
     public static ArrayList<Class<?>> injectMixins(Instrumentation inst, boolean unregisterTransformersImmediately, MixinBase ... mixinBases) {
         HashMap<Class<?>, MixinMethod[]> mixinsForClass = new HashMap<>();
 
-        ArrayList<MixinMethod> mixinMethods = new ArrayList<>(mixinBases.length * 2);
+        ArrayList<MixinMethod> mixinMethods = new ArrayList<>(mixinBases.length);
         for (MixinBase base : mixinBases) {
             mixinMethods.addAll(base.mixins());
         }
@@ -48,7 +49,9 @@ public final class PoetryHookInjector {
                 inst.addTransformer(transformer, true);
 
                 Class<?> injectTo = mixin.injectTo;
-                classesToRetransform.add(injectTo);
+                if (!classesToRetransform.contains(mixin.injectTo)) {  // todo make this HashSet to avoid this lookup maybe
+                    classesToRetransform.add(injectTo);
+                }
                 // majorsopa end
 
                 // sootysplash start
@@ -80,12 +83,13 @@ public final class PoetryHookInjector {
 
     /**
      * Removes the transformers for all mixins and retransforms classes
-     * @param inst {@link Instrumentation} object that created the transformers
+     *
+     * @param inst         {@link Instrumentation} object that created the transformers
      * @param transformers ArrayList of {@link ClassFileTransformer} objects created by the agent
+     * @author majorsopa
      * @see #injectMixins(Instrumentation, boolean, MixinBase...)
      * @see #retransformAllRelevantClasses(Instrumentation, ArrayList)
      * @since 1.0.0
-     * @author majorsopa
      */
     public static void ejectMixins(Instrumentation inst, ArrayList<ClassFileTransformer> transformers) {
         for (ClassFileTransformer transformer : transformers) {
@@ -98,10 +102,10 @@ public final class PoetryHookInjector {
     }
 
     /**
-     * @param inst Agent {@link Instrumentation} object
+     * @param inst                 Agent {@link Instrumentation} object
      * @param classesToRetransform {@link ArrayList} of classes that are to be retransformed
-     * @since 1.0.0
      * @author sootysplash, seperated into api method by majorsopa
+     * @since 1.0.0
      */
     public static void retransformAllRelevantClasses(
             Instrumentation inst,

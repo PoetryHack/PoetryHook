@@ -16,15 +16,16 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 
 /**
- * @since 1.0.0
  * @author majorsopa
  * @author sootysplash
+ * @since 1.0.0
  */
-public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
-    // sootysplash start
-    private static short index = 256;
+public final class MixinMethodVisitor extends MethodVisitor implements Opcodes {
     public static final HashMap<Class<?>, Class<?>> primToWrapper = new HashMap<>();
     public static final HashMap<Class<?>, Method> wrapperPrimMethod = new HashMap<>();
+    // sootysplash start
+    private static short index = 256;
+
     static {
         primToWrapper.put(boolean.class, Boolean.class);
         primToWrapper.put(int.class, Integer.class);
@@ -51,6 +52,7 @@ public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
     // sootysplash end
 
     private final MixinMethod mixin;
+
     public MixinMethodVisitor(MethodVisitor methodVisitor, MixinMethod methodToCall) {
         super(ASM9, methodVisitor);
         this.mixin = methodToCall;
@@ -147,7 +149,6 @@ public class MixinMethodVisitor extends MethodVisitor implements Opcodes {
      * @author sootysplash
      */
     private void callMethod(MixinMethod mixin) {
-
         // majorsopa start
         Method methodToCall = mixin.methodToCall;
         StringBuilder sb = new StringBuilder();
