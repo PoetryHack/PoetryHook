@@ -36,7 +36,7 @@ public final class PostMethodVisitor extends MethodVisitor {
             final Object[] local,
             final int numStack,
             final Object[] stack) {
-        sb.append("FRAME: " + type + " | " + numLocal + " | " + Arrays.toString(local) + " | " + numStack + " | " + Arrays.toString(stack) + "\n");
+        sb.append("FRAME: ").append(type).append(" | ").append(numLocal).append(" | ").append(Arrays.toString(local)).append(" | ").append(numStack).append(" | ").append(Arrays.toString(stack)).append("\n");
         super.visitFrame(type, numLocal, local, numStack, stack);
     }
 
@@ -46,7 +46,7 @@ public final class PostMethodVisitor extends MethodVisitor {
             final String descriptor,
             final Handle bootstrapMethodHandle,
             final Object... bootstrapMethodArguments) {
-        sb.append("DYNAMIC: " + name + " | " + descriptor + " | " + bootstrapMethodHandle + " | " + Arrays.toString(bootstrapMethodArguments) + "\n");
+        sb.append("DYNAMIC: ").append(name).append(" | ").append(descriptor).append(" | ").append(bootstrapMethodHandle).append(" | ").append(Arrays.toString(bootstrapMethodArguments)).append("\n");
         super.visitInvokeDynamicInsn(name, descriptor, bootstrapMethodHandle, bootstrapMethodArguments);
     }
 
@@ -57,38 +57,44 @@ public final class PostMethodVisitor extends MethodVisitor {
             final String name,
             final String descriptor,
             final boolean isInterface) {
-        sb.append("METHOD: " + getOpcodeName(opcode) + " | " + owner + " | " + name + " " + descriptor + "\n");
+        sb.append("METHOD: ").append(getOpcodeName(opcode)).append(" | ").append(owner).append(" | ").append(name).append(" ").append(descriptor).append("\n");
         super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
     }
 
     @Override
     public void visitInsn(final int opcode) {
-        sb.append("INSN: " + getOpcodeName(opcode) + "\n");
+        sb.append("INSN: ").append(getOpcodeName(opcode)).append("\n");
         super.visitInsn(opcode);
     }
 
     @Override
+    public void visitLdcInsn(final Object value) {
+        sb.append("LDC: ").append(value).append("\n");
+        super.visitLdcInsn(value);
+    }
+
+    @Override
     public void visitVarInsn(final int opcode, final int varIndex) {
-        sb.append("VAR: " + getOpcodeName(opcode) + " index: " + varIndex + "\n");
+        sb.append("VAR: ").append(getOpcodeName(opcode)).append(" index: ").append(varIndex).append("\n");
         super.visitVarInsn(opcode, varIndex);
     }
 
     @Override
     public void visitTypeInsn(final int opcode, final String type) {
-        sb.append("TYPE: " + getOpcodeName(opcode) + " type: " + type + "\n");
+        sb.append("TYPE: ").append(getOpcodeName(opcode)).append(" type: ").append(type).append("\n");
         super.visitTypeInsn(opcode, type);
     }
 
     @Override
     public void visitFieldInsn(
             final int opcode, final String owner, final String name, final String descriptor) {
-        sb.append("FIELD: " + getOpcodeName(opcode) + " " + owner + " " + name + " " + descriptor + "\n");
+        sb.append("FIELD: ").append(getOpcodeName(opcode)).append(" ").append(owner).append(" ").append(name).append(" ").append(descriptor).append("\n");
         super.visitFieldInsn(opcode, owner, name, descriptor);
     }
 
     @Override
     public void visitJumpInsn(final int opcode, final Label label) {
-        sb.append("JUMP: " + getOpcodeName(opcode) + " TO: " + label2int.get(label.toString()) + "\n");
+        sb.append("JUMP: ").append(getOpcodeName(opcode)).append(" TO: ").append(label2int.get(label.toString())).append("\n");
         super.visitJumpInsn(opcode, label);
     }
 
@@ -98,8 +104,20 @@ public final class PostMethodVisitor extends MethodVisitor {
         if (!label2int.containsKey(name)) {
             label2int.put(name, min++);
         }
-        sb.append("LABEL: " + label2int.get(name) + "\n");
+        sb.append("LABEL: ").append(label2int.get(name)).append("\n");
         super.visitLabel(label);
+    }
+
+    @Override
+    public void visitIincInsn(final int varIndex, final int increment) {
+        sb.append("IInc: ").append(varIndex).append(" | ").append(increment).append("\n");
+        super.visitIincInsn(varIndex, increment);
+    }
+
+    @Override
+    public void visitIntInsn(int opcode, int operand) {
+        sb.append("IntInsn: ").append(getOpcodeName(opcode)).append(" | ").append(operand).append("\n");
+        super.visitIntInsn(opcode, operand);
     }
 
     @Override
@@ -110,13 +128,13 @@ public final class PostMethodVisitor extends MethodVisitor {
             final Label start,
             final Label end,
             final int index) {
-        sb.append("LOCAL: " + name + " | " + descriptor + " | " + signature + " | " + label2int.get(start.toString()) + " | " + label2int.get(end.toString()) + " | " + index + "\n");
+        sb.append("LOCAL: ").append(name).append(" | ").append(descriptor).append(" | ").append(signature).append(" | ").append(label2int.get(start.toString())).append(" | ").append(label2int.get(end.toString())).append(" | ").append(index).append("\n");
         super.visitLocalVariable(name, descriptor, signature, start, end, index);
     }
 
     @Override
     public void visitMaxs(final int maxStack, final int maxLocals) {
-        sb.append("MAXS: " + maxStack + " | " + maxLocals + "\n");
+        sb.append("MAXS: ").append(maxStack).append(" | ").append(maxLocals).append("\n");
         super.visitMaxs(maxStack, maxLocals);
     }
 
@@ -131,7 +149,13 @@ public final class PostMethodVisitor extends MethodVisitor {
         for (Field f : Opcodes.class.getFields()) {
             try {
                 f.setAccessible(true);
-                if (((int) f.get(null)) == opcode && f.getName().charAt(0) != 'V') {
+                if (((int) f.get(null)) == opcode
+                        && f.getType() == int.class
+                        && f.getName().charAt(0) != 'V'
+                        && !f.getName().startsWith("H_")
+                        && !f.getName().startsWith("F_")
+                        && !f.getName().startsWith("ACC_")
+                        && !f.getName().startsWith("T_")) {
                     opName = f.getName();
                     break;
                 }
