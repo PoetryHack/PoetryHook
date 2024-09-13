@@ -4,13 +4,12 @@
 
 package net.poetryhack.poetryhook.util;
 
-import net.poetryhack.poetryhook.annotations.Matcher;
-import net.poetryhack.poetryhook.annotations.Mixin;
-import net.poetryhack.poetryhook.annotations.MixinInfo;
-import net.poetryhack.poetryhook.annotations.StringMixin;
+import net.poetryhack.poetryhook.annotations.*;
 import net.poetryhack.poetryhook.exceptions.PoetryHookException;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -19,7 +18,7 @@ import java.util.Arrays;
  */
 public class MixinMethod {
     public final MixinInfo annotation;
-    public final Method methodToCall;
+    public final Method  methodToCall;
     public final Class<?> injectTo;
     protected final boolean returnFromHook;
     protected final Class<?> returnType;
@@ -55,7 +54,31 @@ public class MixinMethod {
 
         Class<?>[] annotClasses = this.annotation.toHookArgs;
         boolean isAnnotation = annotClasses.length != 0 || this.annotation.forceUseAnnotationArgs;
-        Class<?>[] params = this.methodToCall.getParameterTypes();
+        Class<?>[] params;
+        {
+            Parameter[] paramsArray = this.methodToCall.getParameters();
+            ArrayList<Class<?>> paramsArrayList = new ArrayList<>();
+            for (Parameter param : paramsArray) {
+                Class<?> classToAdd;
+
+                if (param.isAnnotationPresent(ObjectWrapper.class)) {
+                    try {
+                        classToAdd = MixinMethod.class.getClassLoader().loadClass(param.getAnnotation(ObjectWrapper.class).value());  // todo make it so this isn't hardcoded to this classloader
+                    } catch (ClassNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    classToAdd = param.getType();
+                }
+
+                paramsArrayList.add(classToAdd);
+            }
+            // oh my bad code
+            params = new Class<?>[paramsArrayList.size()];
+            for (int i = 0; i < paramsArrayList.size(); i++) {
+                params[i] = paramsArrayList.get(i);
+            }
+        }
         if (!isAnnotation && params.length > 0 && params[0] == this.injectTo) {
             params = Arrays.copyOfRange(params, 1, params.length);
         }

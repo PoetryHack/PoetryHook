@@ -31,10 +31,10 @@ public final class PoetryHookInjector {
      * @see #ejectMixins(Instrumentation, ArrayList)
      * @since 1.0.0
      */
-    public static ArrayList<Class<?>> injectMixins(Instrumentation inst, boolean unregisterTransformersImmediately, MixinBase... mixinBases) {
+    public static ArrayList<Class<?>> injectMixins(Instrumentation inst, boolean unregisterTransformersImmediately, MixinBase ... mixinBases) {
         HashMap<Class<?>, MixinMethod[]> mixinsForClass = new HashMap<>();
 
-        ArrayList<MixinMethod> mixinMethods = new ArrayList<>(mixinBases.length * 2);
+        ArrayList<MixinMethod> mixinMethods = new ArrayList<>(mixinBases.length);
         for (MixinBase base : mixinBases) {
             mixinMethods.addAll(base.mixins());
         }
@@ -49,7 +49,9 @@ public final class PoetryHookInjector {
                 inst.addTransformer(transformer, true);
 
                 Class<?> injectTo = mixin.injectTo;
-                classesToRetransform.add(injectTo);
+                if (!classesToRetransform.contains(mixin.injectTo)) {  // todo make this HashSet to avoid this lookup maybe
+                    classesToRetransform.add(injectTo);
+                }
                 // majorsopa end
 
                 // sootysplash start

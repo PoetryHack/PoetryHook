@@ -149,7 +149,6 @@ public final class MixinMethodVisitor extends MethodVisitor implements Opcodes {
      * @author sootysplash
      */
     private void callMethod(MixinMethod mixin) {
-
         // majorsopa start
         Method methodToCall = mixin.methodToCall;
         StringBuilder sb = new StringBuilder();
