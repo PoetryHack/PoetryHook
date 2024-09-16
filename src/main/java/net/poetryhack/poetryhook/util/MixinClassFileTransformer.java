@@ -59,7 +59,7 @@ public final class MixinClassFileTransformer implements ClassFileTransformer {
             }
         }
         if (params.length > 0 && !isAnnotation && params[0] == this.mixin.injectTo) {  // modded by majorsopa to avoid ArrayIndexOutOfBoundsException
-            params = Arrays.copyOfRange(params, 1, params.length);
+            params = params.length > 1 ? Arrays.copyOfRange(params, 1, params.length) : new Class<?>[0];
         }
         Class<?>[] clazzes = isAnnotation ? annotation : params;
         // sootysplash end
