@@ -12,6 +12,7 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * Utility class to handle the boilerplate of injection and ejection
@@ -22,6 +23,8 @@ import java.util.HashMap;
  */
 @SuppressWarnings("unused")
 public final class PoetryHookInjector {
+    private static final HashSet<Class<?>> classesToRetransform = new HashSet<>();
+
     /**
      * @param inst                              {@link Instrumentation} object of the agent
      * @param unregisterTransformersImmediately if the transformers should be removed immediately after injection
@@ -31,7 +34,7 @@ public final class PoetryHookInjector {
      * @see #ejectMixins(Instrumentation, ArrayList)
      * @since 1.0.0
      */
-    public static ArrayList<Class<?>> injectMixins(Instrumentation inst, boolean unregisterTransformersImmediately, MixinBase ... mixinBases) {
+    public static ArrayList<Class<?>> injectMixins(Instrumentation inst, boolean unregisterTransformersImmediately, MixinBase... mixinBases) {
         HashMap<Class<?>, MixinMethod[]> mixinsForClass = new HashMap<>();
 
         ArrayList<MixinMethod> mixinMethods = new ArrayList<>(mixinBases.length);
@@ -39,9 +42,7 @@ public final class PoetryHookInjector {
             mixinMethods.addAll(base.mixins());
         }
 
-        // majorsopa start
         ArrayList<ClassFileTransformer> transformers = new ArrayList<>();
-        ArrayList<Class<?>> classesToRetransform = new ArrayList<>();
         for (MixinMethod mixin : mixinMethods) {
             try {
                 MixinClassFileTransformer transformer = new MixinClassFileTransformer(mixin);
@@ -49,12 +50,10 @@ public final class PoetryHookInjector {
                 inst.addTransformer(transformer, true);
 
                 Class<?> injectTo = mixin.injectTo;
-                if (!classesToRetransform.contains(mixin.injectTo)) {  // todo make this HashSet to avoid this lookup maybe
+                if (!classesToRetransform.contains(injectTo)) {
                     classesToRetransform.add(injectTo);
                 }
-                // majorsopa end
 
-                // sootysplash start
                 MixinMethod[] mms = mixinsForClass.getOrDefault(injectTo, new MixinMethod[]{});
                 MixinMethod[] to = new MixinMethod[mms.length + 1];
                 System.arraycopy(mms, 0, to, 0, mms.length);
@@ -65,20 +64,19 @@ public final class PoetryHookInjector {
             }
         }
 
-        retransformAllRelevantClasses(inst, classesToRetransform);
+        retransformAllRelevantClasses(inst, new ArrayList<>(classesToRetransform));
 
         for (MixinMethod mixin : mixinMethods) {
             if (!mixin.loaded) {
                 throw new PoetryHookException("Failed to inject Mixin: " + mixin.methodToCall.getDeclaringClass().getName() + " / " + mixin.methodToCall.getName());
             }
         }
-        // sootysplash end
 
         if (unregisterTransformersImmediately) {
             ejectMixins(inst, transformers);
         }
 
-        return classesToRetransform;
+        return new ArrayList<>(classesToRetransform);
     }
 
     /**
@@ -104,7 +102,7 @@ public final class PoetryHookInjector {
     /**
      * @param inst                 Agent {@link Instrumentation} object
      * @param classesToRetransform {@link ArrayList} of classes that are to be retransformed
-     * @author sootysplash, seperated into api method by majorsopa
+     * @author sootysplash, separated into api method by majorsopa
      * @since 1.0.0
      */
     public static void retransformAllRelevantClasses(
@@ -113,7 +111,7 @@ public final class PoetryHookInjector {
     ) {
         for (Class<?> clazz : classesToRetransform) {
             try {
-                inst.retransformClasses(clazz); // majorsopa
+                inst.retransformClasses(clazz);
             } catch (Throwable e) {
                 System.err.println("Error when transforming " + clazz.getName());
                 throw new PoetryHookException(e);
