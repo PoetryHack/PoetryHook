@@ -159,7 +159,9 @@ public final class MixinClassFileTransformer implements ClassFileTransformer {
 
                 return data;
             } catch (Exception e) {
+                System.err.println("err transforming class " + className + ": " + e.getMessage());
                 e.printStackTrace(System.err);
+                throw new PoetryHookException("failed to transform class " + className, e);
             }
         }
 
