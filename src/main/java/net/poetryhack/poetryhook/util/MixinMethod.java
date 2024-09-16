@@ -63,7 +63,8 @@ public class MixinMethod {
 
                 if (param.isAnnotationPresent(ObjectWrapper.class)) {
                     try {
-                        classToAdd = MixinMethod.class.getClassLoader().loadClass(param.getAnnotation(ObjectWrapper.class).value());  // todo make it so this isn't hardcoded to this classloader
+                        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+                        classToAdd = contextClassLoader.loadClass(param.getAnnotation(ObjectWrapper.class).value());
                     } catch (ClassNotFoundException e) {
                         throw new RuntimeException(e);
                     }
