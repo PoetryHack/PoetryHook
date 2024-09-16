@@ -63,9 +63,9 @@ public class MixinMethod {
 
                 if (param.isAnnotationPresent(ObjectWrapper.class)) {
                     try {
-                        classToAdd = MixinMethod.class.getClassLoader().loadClass(param.getAnnotation(ObjectWrapper.class).value());  // todo make it so this isn't hardcoded to this classloader
+                        classToAdd = MixinMethod.class.getClassLoader().loadClass(param.getAnnotation(ObjectWrapper.class).value());
                     } catch (ClassNotFoundException e) {
-                        throw new RuntimeException(e);
+                        throw new PoetryHookException(e);
                     }
                 } else {
                     classToAdd = param.getType();
@@ -73,11 +73,7 @@ public class MixinMethod {
 
                 paramsArrayList.add(classToAdd);
             }
-            // oh my bad code
-            params = new Class<?>[paramsArrayList.size()];
-            for (int i = 0; i < paramsArrayList.size(); i++) {
-                params[i] = paramsArrayList.get(i);
-            }
+            params = paramsArrayList.toArray(new Class<?>[0]);
         }
         if (!isAnnotation && params.length > 0 && params[0] == this.injectTo) {
             params = Arrays.copyOfRange(params, 1, params.length);
