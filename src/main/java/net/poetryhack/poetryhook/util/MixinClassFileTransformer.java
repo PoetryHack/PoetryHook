@@ -147,19 +147,19 @@ public final class MixinClassFileTransformer implements ClassFileTransformer {
                 final MixinClassWriter classWriter = new MixinClassWriter(classReader, ClassWriter.COMPUTE_FRAMES);
                 classReader.accept(new MixinClassVisitor(classWriter, this.mixin, this.methodName, this.methodSig, false), 0);
                 classWriter.visitEnd();
-
                 byte[] data = classWriter.toByteArray();
                 boolean post = this.mixin.annotation.isPost;
                 if (post) {
-                    ClassReader postReader = new ClassReader(Arrays.copyOf(data, data.length));
-                    MixinClassWriter postWriter = new MixinClassWriter(postReader, 0);
+                    ClassReader postReader = new ClassReader(data);
+                    MixinClassWriter postWriter = new MixinClassWriter(postReader, ClassWriter.COMPUTE_FRAMES);
                     postReader.accept(new MixinClassVisitor(postWriter, this.mixin, this.methodName, this.methodSig, true), 0);
                     postWriter.visitEnd();
+                    data = postWriter.toByteArray();
                 }
 
                 return data;
             } catch (Exception e) {
-                e.printStackTrace(System.err); // revised by sootysplash, simply rethrowing the exception will cause the exception to be lost (and harder to debug)
+                e.printStackTrace(System.err);
             }
         }
 
