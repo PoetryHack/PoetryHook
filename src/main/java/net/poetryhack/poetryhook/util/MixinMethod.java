@@ -5,8 +5,11 @@
 package net.poetryhack.poetryhook.util;
 
 import net.poetryhack.poetryhook.annotations.*;
+import net.poetryhack.poetryhook.exceptions.DefaultExceptionHandler;
+import net.poetryhack.poetryhook.exceptions.PoetryExceptionHandler;
 import net.poetryhack.poetryhook.exceptions.PoetryHookException;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
@@ -18,7 +21,8 @@ import java.util.Arrays;
  */
 public class MixinMethod {
     public final MixinInfo annotation;
-    public final Method  methodToCall;
+    public final PoetryExceptionHandler exceptionHandler;
+    public final Method methodToCall;
     public final Class<?> injectTo;
     protected final boolean returnFromHook;
     protected final Class<?> returnType;
@@ -34,19 +38,30 @@ public class MixinMethod {
     public MixinMethod(Method method) {
         this.methodToCall = method;
 
+        this.annotation = MixinInfo.get(this.methodToCall);
+
+        PoetryExceptionHandler handler;
+        try {
+            handler = this.annotation.exceptionHandler.getDeclaredConstructor().newInstance();
+        } catch (Exception m) {
+            handler = new DefaultExceptionHandler();
+        }
+        this.exceptionHandler = handler;
+
         Class<?> declaringClass = this.methodToCall.getDeclaringClass();
         // Annotations are checked by MixinBase.mixins()
+        Class<?> targetClass;
         if (declaringClass.isAnnotationPresent(StringMixin.class)) {
+            String className = declaringClass.getAnnotation(StringMixin.class).value();
             try {
-                injectTo = MixinMethod.class.getClassLoader().loadClass(declaringClass.getAnnotation(StringMixin.class).value());
+                targetClass = MixinMethod.class.getClassLoader().loadClass(className);
             } catch (ClassNotFoundException e) {
-                throw new PoetryHookException(e);
+                targetClass = handler.handleStringClassNotFound(className, e, this);
             }
         } else {
-            injectTo = declaringClass.getAnnotation(Mixin.class).value();
+            targetClass = declaringClass.getAnnotation(Mixin.class).value();
         }
-
-        this.annotation = MixinInfo.get(this.methodToCall);
+        this.injectTo = targetClass;
         this.type = this.annotation.mixinType;
         this.matcher = this.annotation.matcher;
         this.fieldName = this.matcher.field_name();
@@ -62,10 +77,11 @@ public class MixinMethod {
                 Class<?> classToAdd;
 
                 if (param.isAnnotationPresent(ObjectWrapper.class)) {
+                    String paramName = param.getAnnotation(ObjectWrapper.class).value();
                     try {
-                        classToAdd = MixinMethod.class.getClassLoader().loadClass(param.getAnnotation(ObjectWrapper.class).value());  // todo make it so this isn't hardcoded to this classloader
+                        classToAdd = MixinMethod.class.getClassLoader().loadClass(paramName);  // todo make it so this isn't hardcoded to this classloader
                     } catch (ClassNotFoundException e) {
-                        throw new RuntimeException(e);
+                        classToAdd = handler.handleObjectWrapperNotFound(paramName, e, this);
                     }
                 } else {
                     classToAdd = param.getType();
@@ -84,11 +100,13 @@ public class MixinMethod {
         }
         Class<?>[] clazzes = isAnnotation ? annotClasses : params;
 
+        Class<?> returnClass;
         try {
-            this.returnType = this.injectTo.getDeclaredMethod(this.methodName, clazzes).getReturnType();
+            returnClass = this.injectTo.getDeclaredMethod(this.methodName, clazzes).getReturnType();
         } catch (NoSuchMethodException e) {
-            throw new PoetryHookException(e);// revised by majorsopa
+            returnClass = handler.handleReturnTypeNotFound(this.injectTo, this.methodName, clazzes, e, this);
         }
+        this.returnType = returnClass;
 
         this.returnFromHook = this.annotation.returnFromHook;
         this.location = this.annotation.location;
@@ -96,12 +114,14 @@ public class MixinMethod {
         if (!this.location.equals(InjectLocation.MATCH_METHOD)) {
             return;
         }
+        Method matchM;
+        String methodName = this.matcher.method_name();
         try {
-            String methodName = this.matcher.method_name();
-            this.match_method = this.matcher.method_class().getDeclaredMethod(methodName, this.matcher.method_parameters());
+            matchM = this.matcher.method_class().getDeclaredMethod(methodName, this.matcher.method_parameters());
         } catch (NoSuchMethodException e) {
-            throw new PoetryHookException(e);// revised by majorsopa
+            matchM = handler.handleMatchMethodNotFound(this.matcher.method_class(), methodName, this.matcher.method_parameters(), e, this);
         }
+        this.match_method = matchM;
     }
 
     protected boolean match_opcode(int opcode) {

@@ -11,7 +11,9 @@ import net.poetryhack.poetryhook.util.MixinMethod;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * Utility class to handle the boilerplate of injection and ejection
@@ -28,10 +30,10 @@ public final class PoetryHookInjector {
      * @param mixinBases                        {@link MixinMethod} subclass objects to inject
      * @return ArrayList of {@link Class} objects which can be used for ejection
      * @author majorsopa, revised by sootysplash
-     * @see #ejectMixins(Instrumentation, ArrayList)
+     * @see #ejectMixins(Instrumentation, Collection)
      * @since 1.0.0
      */
-    public static ArrayList<Class<?>> injectMixins(Instrumentation inst, boolean unregisterTransformersImmediately, MixinBase ... mixinBases) {
+    public static HashSet<Class<?>> injectMixins(Instrumentation inst, boolean unregisterTransformersImmediately, MixinBase ... mixinBases) {
         HashMap<Class<?>, MixinMethod[]> mixinsForClass = new HashMap<>();
 
         ArrayList<MixinMethod> mixinMethods = new ArrayList<>(mixinBases.length);
@@ -41,7 +43,7 @@ public final class PoetryHookInjector {
 
         // majorsopa start
         ArrayList<ClassFileTransformer> transformers = new ArrayList<>();
-        ArrayList<Class<?>> classesToRetransform = new ArrayList<>();
+        HashSet<Class<?>> classesToRetransform = new HashSet<>();
         for (MixinMethod mixin : mixinMethods) {
             try {
                 MixinClassFileTransformer transformer = new MixinClassFileTransformer(mixin);
@@ -49,9 +51,7 @@ public final class PoetryHookInjector {
                 inst.addTransformer(transformer, true);
 
                 Class<?> injectTo = mixin.injectTo;
-                if (!classesToRetransform.contains(mixin.injectTo)) {  // todo make this HashSet to avoid this lookup maybe
-                    classesToRetransform.add(injectTo);
-                }
+                classesToRetransform.add(injectTo);
                 // majorsopa end
 
                 // sootysplash start
@@ -69,7 +69,7 @@ public final class PoetryHookInjector {
 
         for (MixinMethod mixin : mixinMethods) {
             if (!mixin.loaded) {
-                throw new PoetryHookException("Failed to inject Mixin: " + mixin.methodToCall.getDeclaringClass().getName() + " / " + mixin.methodToCall.getName());
+                mixin.exceptionHandler.handleMixinFailedInject(mixin);
             }
         }
         // sootysplash end
@@ -85,13 +85,13 @@ public final class PoetryHookInjector {
      * Removes the transformers for all mixins and retransforms classes
      *
      * @param inst         {@link Instrumentation} object that created the transformers
-     * @param transformers ArrayList of {@link ClassFileTransformer} objects created by the agent
+     * @param transformers Collection of {@link ClassFileTransformer} objects created by the agent
      * @author majorsopa
      * @see #injectMixins(Instrumentation, boolean, MixinBase...)
-     * @see #retransformAllRelevantClasses(Instrumentation, ArrayList)
+     * @see #retransformAllRelevantClasses(Instrumentation, Collection)
      * @since 1.0.0
      */
-    public static void ejectMixins(Instrumentation inst, ArrayList<ClassFileTransformer> transformers) {
+    public static void ejectMixins(Instrumentation inst, Collection<ClassFileTransformer> transformers) {
         for (ClassFileTransformer transformer : transformers) {
             try {
                 inst.removeTransformer(transformer);
@@ -103,13 +103,13 @@ public final class PoetryHookInjector {
 
     /**
      * @param inst                 Agent {@link Instrumentation} object
-     * @param classesToRetransform {@link ArrayList} of classes that are to be retransformed
+     * @param classesToRetransform {@link Collection} of classes that are to be retransformed
      * @author sootysplash, seperated into api method by majorsopa
      * @since 1.0.0
      */
     public static void retransformAllRelevantClasses(
             Instrumentation inst,
-            ArrayList<Class<?>> classesToRetransform
+            Collection<Class<?>> classesToRetransform
     ) {
         for (Class<?> clazz : classesToRetransform) {
             try {

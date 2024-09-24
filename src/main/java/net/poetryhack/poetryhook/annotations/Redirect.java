@@ -4,6 +4,8 @@
 
 package net.poetryhack.poetryhook.annotations;
 
+import net.poetryhack.poetryhook.exceptions.DefaultExceptionHandler;
+import net.poetryhack.poetryhook.exceptions.PoetryExceptionHandler;
 import net.poetryhack.poetryhook.util.InjectLocation;
 
 import java.lang.annotation.ElementType;
@@ -28,5 +30,7 @@ public @interface Redirect {
     boolean forceUseAnnotationArgs() default false;
 
     Matcher matcher() default @Matcher;
+
+    Class<? extends PoetryExceptionHandler> exceptionHandler() default DefaultExceptionHandler.class;
 
 }
