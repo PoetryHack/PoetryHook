@@ -135,4 +135,8 @@ public class MixinMethod {
     protected boolean isRedirect() {
         return type == MixinType.Redirect;
     }
+
+    public String getDebugString() {
+        return this.methodToCall.getDeclaringClass() + "." + this.methodToCall.getName();
+    }
 }
