@@ -137,6 +137,6 @@ public class MixinMethod {
     }
 
     public String getDebugString() {
-        return this.methodToCall.getDeclaringClass() + "." + this.methodToCall.getName();
+        return this.methodToCall.getDeclaringClass().getSimpleName() + "." + this.methodToCall.getName();
     }
 }
