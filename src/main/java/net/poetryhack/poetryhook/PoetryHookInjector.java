@@ -10,10 +10,7 @@ import net.poetryhack.poetryhook.util.MixinMethod;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 /**
  * Utility class to handle the boilerplate of injection and ejection
@@ -65,7 +62,7 @@ public final class PoetryHookInjector {
             }
         }
 
-        retransformAllRelevantClasses(inst, classesToRetransform);
+        retransformAllRelevantClasses(inst, classesToRetransform, Optional.of(mixinsForClass));
 
         for (MixinMethod mixin : mixinMethods) {
             if (!mixin.loaded) {
@@ -88,7 +85,7 @@ public final class PoetryHookInjector {
      * @param transformers Collection of {@link ClassFileTransformer} objects created by the agent
      * @author majorsopa
      * @see #injectMixins(Instrumentation, boolean, MixinBase...)
-     * @see #retransformAllRelevantClasses(Instrumentation, Collection)
+     * @see #retransformAllRelevantClasses(Instrumentation, Collection, Optional)
      * @since 1.0.0
      */
     public static void ejectMixins(Instrumentation inst, Collection<ClassFileTransformer> transformers) {
@@ -104,18 +101,29 @@ public final class PoetryHookInjector {
     /**
      * @param inst                 Agent {@link Instrumentation} object
      * @param classesToRetransform {@link Collection} of classes that are to be retransformed
+     * @param debugClass2MixinMethods Optional Map that stores {@link MixinMethod}s for classes that are being retransformed
      * @author sootysplash, seperated into api method by majorsopa
      * @since 1.0.0
      */
     public static void retransformAllRelevantClasses(
             Instrumentation inst,
-            Collection<Class<?>> classesToRetransform
+            Collection<Class<?>> classesToRetransform,
+            Optional<Map<Class<?>, MixinMethod[]>> debugClass2MixinMethods
     ) {
         for (Class<?> clazz : classesToRetransform) {
             try {
                 inst.retransformClasses(clazz); // majorsopa
             } catch (Throwable e) {
                 System.err.println("Error when transforming " + clazz.getName());
+                // sootysplash start
+                MixinMethod[] mms = debugClass2MixinMethods.orElse(new HashMap<>()).getOrDefault(clazz, new MixinMethod[]{});
+                if (mms.length > 0) {
+                    System.err.println(mms.length + " Mixins for class:");
+                    for (MixinMethod mm : mms) {
+                        System.err.println(mm.getDebugString());
+                    }
+                }
+                // sootysplash end
                 throw new PoetryHookException(e);
             }
         }
