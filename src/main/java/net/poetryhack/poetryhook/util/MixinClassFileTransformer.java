@@ -29,42 +29,7 @@ public final class MixinClassFileTransformer implements ClassFileTransformer {
         this.className = mixin.injectTo.getName().replace(".", "/"); // revised by sootysplash
         StringBuilder methodSigSb = new StringBuilder("(");
 
-        // sootysplash start
-        Class<?>[] annotation = mixin.annotation.toHookArgs;
-        boolean isAnnotation = annotation.length != 0 || mixin.annotation.forceUseAnnotationArgs;
-        Class<?>[] params;
-        // todo fix the fact this is duplicated in MixinMethod.java
-        {
-            Parameter[] paramsArray = this.mixin.methodToCall.getParameters();
-            ArrayList<Class<?>> paramsArrayList = new ArrayList<>();
-            for (Parameter param : paramsArray) {
-                Class<?> classToAdd;
-
-                if (param.isAnnotationPresent(ObjectWrapper.class)) {
-                    try {
-                        classToAdd = MixinMethod.class.getClassLoader().loadClass(param.getAnnotation(ObjectWrapper.class).value());  // todo make it so this isn't hardcoded to this classloader
-                    } catch (ClassNotFoundException e) {
-                        throw new RuntimeException(e);
-                    }
-                } else {
-                    classToAdd = param.getType();
-                }
-
-                paramsArrayList.add(classToAdd);
-            }
-            // oh my bad code
-            params = new Class<?>[paramsArrayList.size()];
-            for (int i = 0; i < paramsArrayList.size(); i++) {
-                params[i] = paramsArrayList.get(i);
-            }
-        }
-        if (params.length > 0 && !isAnnotation && params[0] == this.mixin.injectTo) {  // modded by majorsopa to avoid ArrayIndexOutOfBoundsException
-            params = Arrays.copyOfRange(params, 1, params.length);
-        }
-        Class<?>[] clazzes = isAnnotation ? annotation : params;
-        // sootysplash end
-
-        for (Class<?> clazz : clazzes) {
+        for (Class<?> clazz : mixin.getClassArgs()) {
             switch (clazz.getName()) {
                 case "int":
                     methodSigSb.append("I");

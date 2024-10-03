@@ -14,13 +14,21 @@ public class DefaultExceptionHandler implements PoetryExceptionHandler {
     public DefaultExceptionHandler() {}
 
     @Override
-    public Class<?> handleStringClassNotFound(String className, ClassNotFoundException exc, MixinMethod from) {
-        throw new PoetryHookException(String.format("Class: (%s) was not found on runtime for mixin: %s", className, from.getDebugString()), exc);
+    public Class<?> handleStringClassNotFound(String[] classNames, ClassNotFoundException exc, boolean hasNext, MixinMethod from) {
+        if (!hasNext) {
+            throw new PoetryHookException(String.format("Classes: (%s) was not found on runtime for mixin: %s", Arrays.toString(classNames), from.getDebugString()), exc);
+        } else {
+            return null;
+        }
     }
 
     @Override
-    public Class<?> handleObjectWrapperNotFound(String className, ClassNotFoundException exc, MixinMethod from) {
-        throw new PoetryHookException(String.format("Object Class: (%s) was not found on runtime for mixin: %s", className, from.getDebugString()) , exc);
+    public Class<?> handleObjectWrapperNotFound(String[] classNames, ClassNotFoundException exc, boolean hasNext, MixinMethod from) {
+        if (!hasNext) {
+            throw new PoetryHookException(String.format("Object Classes: (%s) was not found on runtime for mixin: %s", Arrays.toString(classNames), from.getDebugString()), exc);
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -34,8 +42,11 @@ public class DefaultExceptionHandler implements PoetryExceptionHandler {
     }
 
     @Override
-    public void handleMixinFailedInject(MixinMethod failure) {
-        throw new PoetryHookException(String.format("Failed to inject Mixin: %s", failure.getDebugString()));
+    public void handleMixinFailedInject(MixinMethod failure, boolean hasNext) {
+        System.err.println(String.format("Failed to inject Mixin: %s", failure.getDebugString()));
+        if (!hasNext) {
+            throw new PoetryHookException("Failed to load some mixins");
+        }
     }
 
 }

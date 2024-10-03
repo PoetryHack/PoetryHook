@@ -19,5 +19,5 @@ public @interface ObjectWrapper {
     /**
      * The binary class name of the class to wrap, e.g. java.lang.String
      */
-    String value();
+    String[] value();
 }

@@ -10,14 +10,14 @@ import java.lang.reflect.Method;
  */
 public interface PoetryExceptionHandler {
 
-    Class<?> handleStringClassNotFound(String className, ClassNotFoundException exc, MixinMethod from);
+    Class<?> handleStringClassNotFound(String[] classNames, ClassNotFoundException exc, boolean hasNext, MixinMethod from);
 
-    Class<?> handleObjectWrapperNotFound(String className, ClassNotFoundException exc, MixinMethod from);
+    Class<?> handleObjectWrapperNotFound(String[] classNames, ClassNotFoundException exc, boolean hasNext, MixinMethod from);
 
     Class<?> handleReturnTypeNotFound(Class<?> declaringClass, String methodName, Class<?>[] methodArgs, NoSuchMethodException exc, MixinMethod from);
 
     Method handleMatchMethodNotFound(Class<?> declaringClass, String methodName, Class<?>[] methodArgs, NoSuchMethodException exc, MixinMethod from);
 
-    void handleMixinFailedInject(MixinMethod failure);
+    void handleMixinFailedInject(MixinMethod failure, boolean hasNext);
 
 }

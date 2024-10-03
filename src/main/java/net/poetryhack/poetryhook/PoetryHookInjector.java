@@ -64,9 +64,11 @@ public final class PoetryHookInjector {
 
         retransformAllRelevantClasses(inst, classesToRetransform, Optional.of(mixinsForClass));
 
-        for (MixinMethod mixin : mixinMethods) {
+        Iterator<MixinMethod> mixinMethodIterator = mixinMethods.iterator();
+        while (mixinMethodIterator.hasNext()) {
+            MixinMethod mixin = mixinMethodIterator.next();
             if (!mixin.loaded) {
-                mixin.exceptionHandler.handleMixinFailedInject(mixin);
+                mixin.exceptionHandler.handleMixinFailedInject(mixin, mixinMethodIterator.hasNext());
             }
         }
         // sootysplash end

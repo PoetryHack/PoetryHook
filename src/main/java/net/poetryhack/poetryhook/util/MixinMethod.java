@@ -14,6 +14,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author sootysplash, revised by majorsopa
@@ -34,6 +36,7 @@ public class MixinMethod {
     protected Method match_method;
     protected String fieldName;
     protected String methodName;
+    private final Class<?>[] clazzes;
 
     public MixinMethod(Method method) {
         this.methodToCall = method;
@@ -50,13 +53,20 @@ public class MixinMethod {
 
         Class<?> declaringClass = this.methodToCall.getDeclaringClass();
         // Annotations are checked by MixinBase.mixins()
-        Class<?> targetClass;
+        Class<?> targetClass = null;
         if (declaringClass.isAnnotationPresent(StringMixin.class)) {
-            String className = declaringClass.getAnnotation(StringMixin.class).value();
-            try {
-                targetClass = MixinMethod.class.getClassLoader().loadClass(className);
-            } catch (ClassNotFoundException e) {
-                targetClass = handler.handleStringClassNotFound(className, e, this);
+            String[] possibleNames = declaringClass.getAnnotation(StringMixin.class).value();
+            Iterator<String> objectWrappers = Arrays.asList(possibleNames).iterator();
+            while (objectWrappers.hasNext()) {
+                String paramName = objectWrappers.next();
+                try {
+                    targetClass = MixinMethod.class.getClassLoader().loadClass(paramName);  // todo make it so this isn't hardcoded to this classloader
+                } catch (ClassNotFoundException e) {
+                    targetClass = handler.handleStringClassNotFound(possibleNames, e, objectWrappers.hasNext(), this);
+                }
+                if (targetClass != null) {
+                    break;
+                }
             }
         } else {
             targetClass = declaringClass.getAnnotation(Mixin.class).value();
@@ -74,14 +84,21 @@ public class MixinMethod {
             Parameter[] paramsArray = this.methodToCall.getParameters();
             ArrayList<Class<?>> paramsArrayList = new ArrayList<>();
             for (Parameter param : paramsArray) {
-                Class<?> classToAdd;
+                Class<?> classToAdd = null;
 
                 if (param.isAnnotationPresent(ObjectWrapper.class)) {
-                    String paramName = param.getAnnotation(ObjectWrapper.class).value();
-                    try {
-                        classToAdd = MixinMethod.class.getClassLoader().loadClass(paramName);  // todo make it so this isn't hardcoded to this classloader
-                    } catch (ClassNotFoundException e) {
-                        classToAdd = handler.handleObjectWrapperNotFound(paramName, e, this);
+                    String[] possibleParams = param.getAnnotation(ObjectWrapper.class).value();
+                    Iterator<String> objectWrappers = Arrays.asList(possibleParams).iterator();
+                    while (objectWrappers.hasNext()) {
+                        String paramName = objectWrappers.next();
+                        try {
+                            classToAdd = MixinMethod.class.getClassLoader().loadClass(paramName);  // todo make it so this isn't hardcoded to this classloader
+                        } catch (ClassNotFoundException e) {
+                            classToAdd = handler.handleObjectWrapperNotFound(possibleParams, e, objectWrappers.hasNext(), this);
+                        }
+                        if (classToAdd != null) {
+                            break;
+                        }
                     }
                 } else {
                     classToAdd = param.getType();
@@ -98,7 +115,7 @@ public class MixinMethod {
         if (!isAnnotation && params.length > 0 && params[0] == this.injectTo) {
             params = Arrays.copyOfRange(params, 1, params.length);
         }
-        Class<?>[] clazzes = isAnnotation ? annotClasses : params;
+        clazzes = isAnnotation ? annotClasses : params;
 
         Class<?> returnClass;
         try {
@@ -122,6 +139,12 @@ public class MixinMethod {
             matchM = handler.handleMatchMethodNotFound(this.matcher.method_class(), methodName, this.matcher.method_parameters(), e, this);
         }
         this.match_method = matchM;
+    }
+
+    protected Class<?>[] getClassArgs() {
+        Class<?>[] clazzesCopy = new Class<?>[clazzes.length];
+        System.arraycopy(clazzes, 0, clazzesCopy, 0, clazzes.length);
+        return clazzesCopy;
     }
 
     protected boolean match_opcode(int opcode) {
