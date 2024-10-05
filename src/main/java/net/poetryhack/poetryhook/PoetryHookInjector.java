@@ -11,6 +11,7 @@ import net.poetryhack.poetryhook.util.MixinMethod;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Utility class to handle the boilerplate of injection and ejection
@@ -31,11 +32,24 @@ public final class PoetryHookInjector {
      * @since 1.0.0
      */
     public static HashSet<Class<?>> injectMixins(Instrumentation inst, boolean unregisterTransformersImmediately, MixinBase ... mixinBases) {
+        return injectMixins(inst, unregisterTransformersImmediately, PoetryHookInjector.class.getClassLoader(), mixinBases);
+    }
+    /**
+     * @param inst                              {@link Instrumentation} object of the agent
+     * @param unregisterTransformersImmediately if the transformers should be removed immediately after injection
+     * @param stringMixinLoader                 {@link ClassLoader} the ClassLoader to use when loading {@link net.poetryhack.poetryhook.annotations.StringMixin}s and {@link net.poetryhack.poetryhook.annotations.ObjectWrapper}s
+     * @param mixinBases                        {@link MixinMethod} subclass objects to inject
+     * @return ArrayList of {@link Class} objects which can be used for ejection
+     * @author majorsopa, revised by sootysplash
+     * @see #ejectMixins(Instrumentation, Collection)
+     * @since 1.0.0
+     */
+    public static HashSet<Class<?>> injectMixins(Instrumentation inst, boolean unregisterTransformersImmediately, ClassLoader stringMixinLoader, MixinBase ... mixinBases) {
         HashMap<Class<?>, MixinMethod[]> mixinsForClass = new HashMap<>();
 
         ArrayList<MixinMethod> mixinMethods = new ArrayList<>(mixinBases.length);
         for (MixinBase base : mixinBases) {
-            mixinMethods.addAll(base.mixins());
+            mixinMethods.addAll(base.mixins(stringMixinLoader));
         }
 
         // majorsopa start
@@ -62,6 +76,7 @@ public final class PoetryHookInjector {
             }
         }
 
+        System.out.println(classesToRetransform.stream().map(Class::getName).collect(Collectors.toList()));
         retransformAllRelevantClasses(inst, classesToRetransform, Optional.of(mixinsForClass));
 
         Iterator<MixinMethod> mixinMethodIterator = mixinMethods.iterator();

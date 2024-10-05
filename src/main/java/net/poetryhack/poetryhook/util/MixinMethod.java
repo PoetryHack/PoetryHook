@@ -7,15 +7,12 @@ package net.poetryhack.poetryhook.util;
 import net.poetryhack.poetryhook.annotations.*;
 import net.poetryhack.poetryhook.exceptions.DefaultExceptionHandler;
 import net.poetryhack.poetryhook.exceptions.PoetryExceptionHandler;
-import net.poetryhack.poetryhook.exceptions.PoetryHookException;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * @author sootysplash, revised by majorsopa
@@ -39,6 +36,10 @@ public class MixinMethod {
     private final Class<?>[] clazzes;
 
     public MixinMethod(Method method) {
+        this(method, MixinMethod.class.getClassLoader());
+    }
+
+    public MixinMethod(Method method, ClassLoader stringMixinLoader) {
         this.methodToCall = method;
 
         this.annotation = MixinInfo.get(this.methodToCall);
@@ -60,7 +61,7 @@ public class MixinMethod {
             while (objectWrappers.hasNext()) {
                 String paramName = objectWrappers.next();
                 try {
-                    targetClass = MixinMethod.class.getClassLoader().loadClass(paramName);  // todo make it so this isn't hardcoded to this classloader
+                    targetClass = stringMixinLoader.loadClass(paramName);
                 } catch (ClassNotFoundException e) {
                     targetClass = handler.handleStringClassNotFound(possibleNames, e, objectWrappers.hasNext(), this);
                 }
@@ -92,7 +93,7 @@ public class MixinMethod {
                     while (objectWrappers.hasNext()) {
                         String paramName = objectWrappers.next();
                         try {
-                            classToAdd = MixinMethod.class.getClassLoader().loadClass(paramName);  // todo make it so this isn't hardcoded to this classloader
+                            classToAdd = stringMixinLoader.loadClass(paramName);
                         } catch (ClassNotFoundException e) {
                             classToAdd = handler.handleObjectWrapperNotFound(possibleParams, e, objectWrappers.hasNext(), this);
                         }

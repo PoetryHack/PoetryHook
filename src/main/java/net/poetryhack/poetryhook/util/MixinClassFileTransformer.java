@@ -4,13 +4,10 @@
 
 package net.poetryhack.poetryhook.util;
 
-import net.poetryhack.poetryhook.annotations.ObjectWrapper;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 
 import java.lang.instrument.ClassFileTransformer;
-import java.lang.reflect.Parameter;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
