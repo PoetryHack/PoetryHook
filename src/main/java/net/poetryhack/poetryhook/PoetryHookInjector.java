@@ -76,7 +76,6 @@ public final class PoetryHookInjector {
             }
         }
 
-        System.out.println(classesToRetransform.stream().map(Class::getName).collect(Collectors.toList()));
         retransformAllRelevantClasses(inst, classesToRetransform, Optional.of(mixinsForClass));
 
         Iterator<MixinMethod> mixinMethodIterator = mixinMethods.iterator();
