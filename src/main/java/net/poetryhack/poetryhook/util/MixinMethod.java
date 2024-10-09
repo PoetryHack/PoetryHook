@@ -120,7 +120,11 @@ public class MixinMethod {
 
         Class<?> returnClass;
         try {
-            returnClass = this.injectTo.getDeclaredMethod(this.methodName, clazzes).getReturnType();
+            if (this.methodName.equals("<init>")) {
+                returnClass = void.class;
+            } else {
+                returnClass = this.injectTo.getDeclaredMethod(this.methodName, clazzes).getReturnType();
+            }
         } catch (NoSuchMethodException e) {
             returnClass = handler.handleReturnTypeNotFound(this.injectTo, this.methodName, clazzes, e, this);
         }
