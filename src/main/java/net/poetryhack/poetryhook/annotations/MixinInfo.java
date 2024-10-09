@@ -4,6 +4,7 @@
 
 package net.poetryhack.poetryhook.annotations;
 
+import net.poetryhack.poetryhook.exceptions.PoetryExceptionHandler;
 import net.poetryhack.poetryhook.exceptions.PoetryHookException;
 import net.poetryhack.poetryhook.util.InjectLocation;
 import net.poetryhack.poetryhook.util.MixinType;
@@ -22,6 +23,7 @@ public final class MixinInfo {
     public final boolean forceUseAnnotationArgs;
     public final Matcher matcher;
     public final MixinType mixinType;
+    public final Class<? extends PoetryExceptionHandler> exceptionHandler;
     public boolean isPost;
     private MixinInfo(InjectLocation location,
                       String value,
@@ -29,6 +31,7 @@ public final class MixinInfo {
                       boolean returnFromHook,
                       boolean forceUseAnnotationArgs,
                       Matcher matcher,
+                      Class<? extends PoetryExceptionHandler> exceptionHandler,
                       MixinType mixinType) {
         this.location = location;
         this.value = value;
@@ -36,6 +39,7 @@ public final class MixinInfo {
         this.returnFromHook = returnFromHook;
         this.forceUseAnnotationArgs = forceUseAnnotationArgs;
         this.matcher = matcher;
+        this.exceptionHandler = exceptionHandler;
         this.mixinType = mixinType;
     }
 
@@ -46,6 +50,7 @@ public final class MixinInfo {
                 inject.returnFromHook(),
                 inject.forceUseAnnotationArgs(),
                 inject.matcher(),
+                inject.exceptionHandler(),
                 MixinType.Inject);
     }
 
@@ -56,6 +61,7 @@ public final class MixinInfo {
                 false,
                 redirect.forceUseAnnotationArgs(),
                 redirect.matcher(),
+                redirect.exceptionHandler(),
                 MixinType.Redirect);
     }
 

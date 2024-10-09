@@ -16,4 +16,8 @@ public final class PoetryHookException extends RuntimeException {
     public PoetryHookException(Throwable cause) {
         super(cause);
     }
+
+    public PoetryHookException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

@@ -20,16 +20,16 @@ import java.util.ArrayList;
  * @author majorsopa, rewritten by sootysplash
  * @since 1.0.0
  */
-@SuppressWarnings("unused")
 public interface MixinBase {
 
     /**
      * @return ArrayList of {@link MixinMethod} contained by this mixin
+     * @param stringMixinLoader {@link ClassLoader} the ClassLoader to use when loading {@link net.poetryhack.poetryhook.annotations.StringMixin}s and {@link net.poetryhack.poetryhook.annotations.ObjectWrapper}s
      * @author sootysplash
      * @author majorsopa
      * @since 1.0.0
      */
-    default ArrayList<MixinMethod> mixins() {
+    default ArrayList<MixinMethod> mixins(ClassLoader stringMixinLoader) {
         ArrayList<MixinMethod> mixinsToReturn = new ArrayList<>();
 
         if (!(
@@ -42,10 +42,20 @@ public interface MixinBase {
         for (Method method : this.getClass().getDeclaredMethods()) {
             if (method.isAnnotationPresent(Inject.class)
                     || method.isAnnotationPresent(Redirect.class)) {
-                mixinsToReturn.add(new MixinMethod(method));
+                mixinsToReturn.add(new MixinMethod(method, stringMixinLoader));
             }
         }
 
         return mixinsToReturn;
+    }
+
+    /**
+     * @return ArrayList of {@link MixinMethod} contained by this mixin
+     * @author sootysplash
+     * @author majorsopa
+     * @since 1.0.0
+     */
+    default ArrayList<MixinMethod> mixins() {
+        return mixins(MixinBase.class.getClassLoader());
     }
 }
