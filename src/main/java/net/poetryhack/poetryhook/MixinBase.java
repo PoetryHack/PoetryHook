@@ -58,4 +58,5 @@ public interface MixinBase {
     default ArrayList<MixinMethod> mixins() {
         return mixins(MixinBase.class.getClassLoader());
     }
+
 }
