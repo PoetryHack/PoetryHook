@@ -31,11 +31,11 @@ public final class MixinClassVisitor extends ClassVisitor {
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
         if (name.equals(this.methodName) && descriptor.equals(this.methodSignature)) {
             // sootysplash start
-            if (!isPost) {
-                return new MixinMethodVisitor(super.visitMethod(access, name, descriptor, signature, exceptions), this.mixin);
+            if (isPost) {
+                return new PostMethodVisitor(super.visitMethod(access, name, descriptor, signature, exceptions));
             }
             // sootysplash end
-            return new PostMethodVisitor(super.visitMethod(access, name, descriptor, signature, exceptions));
+            return new MixinMethodVisitor(super.visitMethod(access, name, descriptor, signature, exceptions), this.mixin);
         }
         return super.visitMethod(access, name, descriptor, signature, exceptions);
     }
